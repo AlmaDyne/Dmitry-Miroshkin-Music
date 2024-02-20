@@ -8,11 +8,6 @@
         <link rel="icon" href="img/icons/favicon.png">
         <link rel="stylesheet" href="styles/fonts.css" type="text/css">
         <link rel="stylesheet" href="styles/style.css" type="text/css">
-        <!--
-        <link rel="preload" importance="high" as="image" href="img/icons/scrolling-cursor-center.png" type="image/png">
-        <link rel="preload" importance="high" as="image" href="img/icons/scrolling-cursor-up.png" type="image/png">
-        <link rel="preload" importance="high" as="image" href="img/icons/scrolling-cursor-down.png" type="image/png">
-        -->
     </head>
     <body class="background-blur">
         <script>
@@ -32,109 +27,121 @@
             </nav>
         </header>
         <main>
-            <div id="player" class="loading">
-                <div class="selected-track">
-                    <div id="display-info" hidden></div>
-                    <div><span id="display-title" class="display"></span></div>
-                    <div><span id="display-artist" class="display"></span></div>
-                </div>
-
-                <div class="track-time-info">
-                    <div id="current-time" class="time-display">
-                        <div class="digit">-</div
-                        ><div class="digit">-</div
-                        ><div class="divider">:</div
-                        ><div class="digit">-</div
-                        ><div class="digit">-</div>
+            <div id="player-container" class="loading">
+                <div id="player">
+                    <div class="selected-track">
+                        <div id="display-info" hidden></div>
+                        <div><span id="display-title" class="display"></span></div>
+                        <div><span id="display-artist" class="display"></span></div>
                     </div>
-                    <div id="time-range" data-tooltip="">
-                        <div id="timeline"></div>
-                        <div id="time-bar" hidden></div>
-                    </div>
-                    <div id="duration" class="time-display">
-                        <div class="digit">-</div
-                        ><div class="digit">-</div
-                        ><div class="divider">:</div
-                        ><div class="digit">-</div
-                        ><div class="digit">-</div>
-                    </div>
-                </div>
-
-                <player-controls>
-                    <i slot="play-pause" id="play-pause" class="icon-play" data-tooltip="Play/pause"></i>
-                    <i slot="stop" id="stop" class="icon-stop" data-tooltip="Stop"></i>
-                    <i slot="rewind" id="rewind" class="icon-to-start" data-tooltip="Step back/fast-rewind"></i>
-                    <i slot="forward" id="forward" class="icon-to-end" data-tooltip="Step forward/fast-forward"></i>
-                    <div slot="indicator" id="indicator"></div>
-                    <div slot="shuffle" class="btn-img-wrapper" data-tooltip="Shuffle playlist">
-                        <div id="shuffle" class="circle-background">
-                            <img src="img/icons/random_track.png" alt="Shuffle Playlist">
+    
+                    <div class="track-time-info">
+                        <div id="current-time" class="time-display">
+                            <div class="digit">-</div
+                            ><div class="digit">-</div
+                            ><div class="divider">:</div
+                            ><div class="digit">-</div
+                            ><div class="digit">-</div>
+                        </div>
+                        <div id="time-range" data-tooltip="">
+                            <div id="timeline"></div>
+                            <div id="time-bar" hidden></div>
+                        </div>
+                        <div id="duration" class="time-display">
+                            <div class="digit">-</div
+                            ><div class="digit">-</div
+                            ><div class="divider">:</div
+                            ><div class="digit">-</div
+                            ><div class="digit">-</div>
                         </div>
                     </div>
-                    <div slot="repeat" class="btn-img-wrapper" data-tooltip="Repeat playlist/track">
-                        <div id="repeat" class="circle-background" data-repeat="none">
-                            <img src="img/icons/repeat_playlist.png" alt="Repeat Playlist">
+    
+                    <player-controls>
+                        <i slot="play-pause" id="play-pause" class="icon-play" data-tooltip="Play/pause"></i>
+                        <i slot="stop" id="stop" class="icon-stop" data-tooltip="Stop"></i>
+                        <i slot="rewind" id="rewind" class="icon-to-start" data-tooltip="Step back/fast-rewind"></i>
+                        <i slot="forward" id="forward" class="icon-to-end" data-tooltip="Step forward/fast-forward"></i>
+                        <div slot="indicator" id="indicator"></div>
+                        <i slot="shuffle" class="btn-img-wrapper" data-tooltip="Shuffle playlist">
+                            <div id="shuffle" class="circle-background">
+                                <img src="img/icons/shuffle_playlist.png" alt="Shuffle Playlist">
+                            </div>
+                        </i>
+                        <i slot="repeat" class="btn-img-wrapper" data-tooltip="Repeat playlist/track">
+                            <div id="repeat" class="circle-background" data-repeat="none">
+                                <img src="img/icons/repeat_playlist.png" alt="Repeat Playlist">
+                            </div>
+                        </i>
+                        <div slot="volume" class="volume-container">
+                            <i id="volume" class="icon-volume" data-tooltip="Volume on/off"></i>
+                            <div id="volume-range" data-tooltip="">
+                                <div class="inactive-range"></div>
+                                <div id="volumeline"></div>
+                                <div id="volume-bar"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div slot="volume" class="volume-wrapper">
-                        <i id="volume" class="icon-volume" data-tooltip="Volume on/off"></i>
-                        <div id="volume-range" data-tooltip="">
-                            <div class="inactive-range"></div>
-                            <div id="volumeline"></div>
-                            <div id="volume-bar"></div>
+                    </player-controls>
+    
+                    <div id="playlist-container">
+                        <div class="scroll-arrows-box up">
+                            <div class="playlist-scroll-arrow" hidden></div>
+                            <i class="outer-scroll-arrow left icon-up-circled" hidden></i>
+                            <i class="outer-scroll-arrow right icon-up-circled" hidden></i>
                         </div>
-                    </div>
-                </player-controls>
-
-                <div class="playlist-container">
-                    <div id="scroll-arrow-up" class="scroll-arrow"></div>
-
-                    <div id="playlist-limiter">
-                        <div id="playlist">
-                            <!-- Example track tree
-                            <div class="track">
-                                <audio></audio>
-                                <div class="loading-figure"></div>
-                                <div class="screen-limiter">
-                                    <span class="author-title"></span>
+    
+                        <div id="visible-playlist-area" tabindex="0">
+                            <div id="playlist-limiter">
+                                <div id="playlist">
+                                    <!-- Example track tree
+                                    <div class="track">
+                                        <audio></audio>
+                                        <div class="loading-figure"></div>
+                                        <div class="screen-limiter">
+                                            <span class="author-title"></span>
+                                        </div>
+                                        <div class="load-info">
+                                            <div class="progress">
+                                                <div class="status"></div>
+                                            </div>
+                                            <div class="display-progress"></div>
+                                        </div>
+                                    </div>-->
                                 </div>
-                                <div class="load-info">
-                                    <div class="progress">
-                                        <div class="status"></div>
-                                    </div>
-                                    <div class="display-progress"></div>
-                                </div>
-                            </div>-->
+                            </div>
+                        </div>
+    
+                        <div class="scroll-arrows-box down">
+                            <div class="playlist-scroll-arrow" hidden></div>
+                            <i class="outer-scroll-arrow left icon-down-circled" hidden></i>
+                            <i class="outer-scroll-arrow right icon-down-circled" hidden></i>
                         </div>
                     </div>
-
-                    <div id="scroll-arrow-down" class="scroll-arrow"></div>
-                </div>
-
-                <div class="player-footer">
-                    <div class="left-col">
-                        <div class="config-wrapper">
-                            <i id="configuration" class="icon-view-mode" data-tooltip="Buttons configuration"></i>
+    
+                    <div class="player-footer">
+                        <div class="left-col">
+                            <div class="config-wrapper">
+                                <i id="configuration" class="icon-view-mode" data-tooltip="Buttons configuration"></i>
+                            </div>
+                            <i id="coloring" class="icon-brush" data-tooltip="Player color"></i>
+                            <i id="playlist-style" class="icon-align-center" data-tooltip="Playlist style"></i>
                         </div>
-                        <i id="coloring" class="icon-brush" data-tooltip="Player color"></i>
-                        <i id="playlist-style" class="icon-align-center" data-tooltip="Playlist style"></i>
-                    </div>
-                    <div class="center-col">
-                        <span class="version">v0.99.9.9.9</span>
-                    </div>
-                    <div class="right-col">
-                        <i id="settings" class="icon-cog-circled" data-tooltip="Settings"></i>
-                        <i id="info" class="icon-info" data-tooltip="Assigned keys info"></i>
+                        <div class="center-col">
+                            <span class="version">v1.0</span>
+                        </div>
+                        <div class="right-col">
+                            <i id="settings" class="icon-cog-circled" data-tooltip="Settings"></i>
+                            <i id="info" class="icon-info" data-tooltip="Assigned keys info"></i>
+                        </div>
                     </div>
                 </div>
-
+    
                 <div id="tooltip"></div>
-
+        
                 <div id="settings-area" hidden>
                     <textarea id="current-playlist" cols="50" readonly></textarea>
                     <section class="setting-block">
-                        <label for="visible-tracks-checkbox">Set own number of visible tracks (0-999)</label>
-                        <input id="visible-tracks-checkbox" type="checkbox">
+                        <input id="visible-tracks-checkbox" type="checkbox"
+                        ><label for="visible-tracks">Set own number of visible tracks (0-999)</label>
                         <input id="visible-tracks" type="number" min="0" max="999" disabled>
                     </section>
                     <section class="setting-block">
@@ -148,13 +155,13 @@
                     <button id="default-settings"><i class="icon-wrench"></i> Reset to default</button>
                     <button id="close-settings" class="button-close"><i class="icon-cancel"></i></button>
                 </div>
-
+    
                 <div id="modal-area" hidden
                     ><article class="key-info">
                         <button id="close-info" class="button-close"><i class="icon-cancel"></i></button>
                         <div class="inner-scroll">
                             <h2>Assigned Keys</h2>
-
+    
                             <!--Play/Pause-->
                             <section>
                                 <div class="assigned-keys">
@@ -183,7 +190,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Stop-->
                             <section>
                                 <div class="assigned-keys">
@@ -201,7 +208,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Step Forward-->
                             <section>
                                 <div class="assigned-keys">
@@ -225,7 +232,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Step Back-->
                             <section>
                                 <div class="assigned-keys">
@@ -252,7 +259,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Fast-Forward-->
                             <section>
                                 <div class="assigned-keys">
@@ -285,7 +292,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Fast-Rewind-->
                             <section>
                                 <div class="assigned-keys">
@@ -317,7 +324,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Volume On/Off-->
                             <section>
                                 <div class="assigned-keys">
@@ -339,7 +346,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Volume Increasing-->
                             <section>
                                 <div class="assigned-keys">
@@ -358,7 +365,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Volume Decreasing-->
                             <section>
                                 <div class="assigned-keys">
@@ -377,7 +384,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Shuffle-->
                             <section>
                                 <div class="assigned-keys">
@@ -389,7 +396,7 @@
                                             <div class="icon-background">
                                                 <div class="btn-img-wrapper">
                                                     <div class="circle-background">
-                                                        <img src="img/icons/random_track.png" alt="Shuffle Playlist">
+                                                        <img src="img/icons/shuffle_playlist.png" alt="Shuffle Playlist">
                                                     </div>
                                                 </div>
                                             </div>
@@ -405,7 +412,7 @@
                                             <div class="icon-background">
                                                 <div class="btn-img-wrapper">
                                                     <div class="circle-background active">
-                                                        <img src="img/icons/random_track.png" alt="Shuffle Playlist">
+                                                        <img src="img/icons/shuffle_playlist.png" alt="Shuffle Playlist">
                                                     </div>
                                                 </div>
                                             </div>
@@ -418,7 +425,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Repeat-->
                             <section>
                                 <div class="assigned-keys">
@@ -479,7 +486,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Configuration-->
                             <section>
                                 <div class="assigned-keys">
@@ -498,7 +505,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Player Color-->
                             <section>
                                 <div class="assigned-keys">
@@ -516,7 +523,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Playlist Style-->
                             <section>
                                 <div class="assigned-keys">
@@ -543,7 +550,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Settings-->
                             <section>
                                 <div class="assigned-keys">
@@ -565,7 +572,7 @@
                                     </div>
                                 </div>
                             </section>
-
+    
                             <!--Key Info-->
                             <section>
                                 <div class="assigned-keys">

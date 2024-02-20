@@ -3,7 +3,7 @@
 let textInfo = [];
 document.querySelectorAll('.about .info > p').forEach(p => textInfo.push(p));
 
-window.onload = () => animateText({
+window.addEventListener('load', () => animateText({
     timing(timeFraction) {
         return Math.pow(timeFraction, 1.75);
     },
@@ -34,7 +34,7 @@ window.onload = () => animateText({
     },
 
     duration: 2500
-});
+}));
 
 function animateText({timing, draw, duration}) {
     let startTime = performance.now();

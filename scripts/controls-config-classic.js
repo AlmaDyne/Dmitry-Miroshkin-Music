@@ -10,9 +10,8 @@ export const configClassic = `
             align-items: center;
             line-height: 100%;
             vertical-align: middle;
-            margin-bottom: 14px;
         }
-        ::slotted(.volume-wrapper) {
+        ::slotted(.volume-container) {
             margin: 0 25px !important;
         }
     </style>
