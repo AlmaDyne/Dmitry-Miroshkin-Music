@@ -59,6 +59,7 @@ a:hover:not(.main-title) {
 i {
     border-radius: 50%;
     cursor: pointer;
+    transition: color var(--transition-time-main), text-shadow  var(--transition-time-main);
 }
 
 header {
@@ -206,8 +207,8 @@ main {
 }
 
 #player {
-    margin-left: calc(30% - var(--player-width)/2 - var(--player-side-padding) + var(--scrollbar-width)*0.3);
     width: var(--player-width);
+    margin-left: calc(30% - var(--player-width)/2 - var(--player-side-padding) + var(--scrollbar-width)*0.3);
     padding: 26px var(--player-side-padding) 0;
     text-align: center;
     text-transform: uppercase;
@@ -221,6 +222,7 @@ main {
     height: 60px;
     margin-bottom: 24px;
     overflow: hidden;
+    transition: color var(--transition-time-main);
 }
 .selected-track > #display-info {
     position: absolute;
@@ -231,11 +233,12 @@ main {
     color: var(--player-color-main);
     overflow: auto;
     opacity: 0;
-    transition: opacity 750ms;
+    transition: opacity 750ms, color var(--transition-time-main);
     scroll-behavior: smooth;
 }
 .selected-track > #display-info > .track {
     color: rgb(var(--player-color-emphase));
+    transition: color var(--transition-time-main);
 }
 .selected-track > #display-info > .time {
     color: var(--player-global-color-emphase);
@@ -265,6 +268,7 @@ main {
 }
 .track-time-info > .time-display {
     display: inline-block;
+    transition: color var(--transition-time-main);
 }
 .track-time-info > .time-display > div {
     display: inline-block;
@@ -313,7 +317,6 @@ player-controls {
 player-controls i {
     margin: 0 5px;
     font-size: 36pt;
-    transition: all var(--transition-time-main);
 }
 player-controls i:hover {
     text-shadow: var(--player-shadow-hover);
@@ -333,6 +336,9 @@ player-controls #indicator {
 player-controls #indicator.active {
     background-color: rgb(var(--player-color-emphase));
 }
+#player.changing-color #indicator {
+    transition: background-color var(--transition-time-main);
+}
 player-controls .btn-img-wrapper,
 .key-info .btn-img-wrapper {
     display: inline-block;
@@ -347,7 +353,10 @@ player-controls .circle-background,
     height: 23px; /* Чётность должна совпадать с чётностью соотв. свойства эл-та i#volume */
     background-color: var(--player-color-inactive);
     border-radius: 50%;
-    transition: all var(--transition-time-main);
+    transition:
+        background-color var(--transition-time-main),
+        box-shadow var(--transition-time-main)
+    ;
 }
 player-controls .circle-background.active,
 .key-info .circle-background.active {
@@ -452,6 +461,12 @@ player-controls #volume-bar.active {
     opacity: var(--scroll-elems-opacity);
     transition: opacity var(--transition-time-main);
 }
+#player.changing-color .playlist-scroll-arrow {
+    transition:
+        opacity var(--transition-time-main),
+        border-color var(--transition-time-main)
+    ;
+}
 #playlist-container .playlist-scroll-arrow.inactive {
     --playlist-scroll-arrow-color: var(--player-color-inactive);
     --playlist-scroll-arrow-shadow: var(--player-color-inactive);
@@ -487,7 +502,7 @@ player-controls #volume-bar.active {
     bottom: var(--y-shift);
 }
 #playlist-container .outer-scroll-arrow:hover {
-    background: var(--player-background-color-even);
+    background-color: var(--player-background-color-even);
 }
 
 #playlist-limiter {
@@ -503,6 +518,10 @@ player-controls #volume-bar.active {
     outline: 1px solid rgba(var(--player-color-emphase), var(--scroll-elems-opacity));
     box-shadow: 0 0 6px 2px rgba(var(--player-color-emphase), calc(var(--scroll-elems-opacity) * 75%));
     border-radius: 6px;
+}
+#player.changing-color #visible-playlist-area:focus {
+    outline: none;
+    transition: box-shadow var(--transition-time-main);
 }
 
 #playlist {
@@ -526,7 +545,6 @@ player-controls #volume-bar.active {
 #playlist > .track {
     position: relative;
     height: var(--track-height);
-    font-size: 13pt;
     padding: 0 9%;
     /*border: 1px solid;
     box-sizing: border-box;*/
@@ -549,9 +567,20 @@ player-controls #volume-bar.active {
 #playlist > .track > .screen-limiter {
     padding: 6px 0;
     color: var(--playlist-color-static);
+    font-size: 13pt;
     font-weight: normal;
     overflow: hidden;
-    transition: font-size var(--transition-time-main);
+    transition:
+        font-size var(--transition-time-main),
+        margin var(--transition-time-main)
+    ;
+}
+#player.changing-color .screen-limiter {
+    transition:
+        font-size var(--transition-time-main),
+        margin var(--transition-time-main),
+        color var(--transition-time-main)
+    ;
 }
 #playlist.smooth > .track > .screen-limiter {
     mask-image: linear-gradient(to right, currentColor 90%, transparent 100%);
@@ -587,6 +616,7 @@ player-controls #volume-bar.active {
 #playlist.strict > .track > .screen-limiter > .track-title.selected {
     padding-left: 4px;
     border: 1px solid var(--player-color-main);
+    transition: border-color var(--transition-time-main);
 }
 
 @media (hover: hover) { /* For desctop */
@@ -674,7 +704,6 @@ player-controls #volume-bar.active {
     padding: 6px;
     color: var(--player-color-main);
     font-size: 17pt;
-    transition: all var(--transition-time-main);
 }
 .player-footer i:hover {
     text-shadow: var(--player-shadow-hover);
@@ -711,11 +740,12 @@ player-controls #volume-bar.active {
     overflow: auto;
     scroll-behavior: smooth;
 }
-#settings-area > .setting-block {
+#settings-area > .setting-section {
     margin: 2px 0;
     padding: 4px;
     background-color: rgb(var(--player-color-emphase));
     text-align: right;
+    transition: background-color var(--transition-time-main);
 }
 #settings-area label {
     font-size: 11pt;
@@ -930,7 +960,10 @@ player-controls #volume-bar.active {
     border-radius: 4px;
     z-index: 4;
     opacity: 0;
-    transition: opacity var(--transition-time-main), margin-top var(--transition-time-main);
+    transition:
+        opacity var(--transition-time-main),
+        margin-top var(--transition-time-main)
+    ;
     pointer-events: none;
 }
 

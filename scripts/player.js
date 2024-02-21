@@ -3,6 +3,7 @@ import { configClassic } from '../scripts/controls-config-classic.js';
 import { configStylish } from '../scripts/controls-config-stylish.js';
 import { PlayerButtonsHoverIntent } from '../scripts/player-buttons-hover-intent.js';
 
+const cssRoot = document.querySelector(':root');
 const playerContainer = document.getElementById('player-container');
 const player = document.getElementById('player');
 const tooltip = document.getElementById('tooltip');
@@ -384,9 +385,9 @@ function changePlayerColor(idx) {
 
     console.log('player color = ' + playerColor);
 
-    let transTime = getComputedStyle(document.querySelector(':root')).getPropertyValue('--transition-time-main');
-    indicator.style.transitionDuration = transTime;
-    setTimeout(() => indicator.style.transitionDuration = '', parseFloat(transTime));
+    player.classList.add('changing-color');
+    let transTime = parseInt(getComputedStyle(cssRoot).getPropertyValue('--transition-time-main'));
+    promiseChange(colorBtn, 'KeyX', transTime, () => player.classList.remove('changing-color'));
 }
 
 ////////////////////////////
@@ -1513,6 +1514,12 @@ function finishTrack(audio) {
         } else if (acceleration && accelerationType === 'fast-rewind') { 
             timelinePos = timeRange.offsetWidth;
             if (selectedAudio.duration) selectedAudio.currentTime = selectedAudio.duration;
+        }
+
+        if (!settingsArea.hidden && !acceleration) {
+            clearTimeout(timerFocusDelay);
+            if (!highlightActiveElem) highlightActiveElem = document.activeElement;
+            returnFocus(HIGHLIGHT_SELECTED_FOCUS_DELAY);
         }
 
         showTrackInfo(selectedAudio);
@@ -3373,33 +3380,38 @@ function highlightButton(btn, key, actionFunc, arg) {
             actionFunc(arg);
         }
 
-        // Return focus to the last focused element
-        if (selectedAudio && !settingsArea.hidden) {
-            if (!timerWindowScrollDelay && !timerFinishPlay) {
-                runTimerFocusDelay();
-            } else {
-                document.addEventListener('endWinScroll', waitEndingWinScroll);
-
-                function waitEndingWinScroll() {
-                    clearTimeout(timerFocusDelay);
-                    runTimerFocusDelay();
-
-                    document.removeEventListener('endWinScroll', waitEndingWinScroll);
-                }
-            }
-
-            function runTimerFocusDelay() {
-                timerFocusDelay = setTimeout(() => {
-                    let preventScroll = (highlightActiveElem == visPlaylistArea) ? true : false;
-
-                    highlightActiveElem.focus({preventScroll});
-                    highlightActiveElem = null;
-                }, delayTime);
-            }
-        } else {
-            highlightActiveElem = null;
-        }
+        returnFocus(delayTime);
     });
+}
+
+function returnFocus(delayTime) {
+    if (selectedAudio && !settingsArea.hidden) {
+        if (acceleration) return;
+        
+        if (!timerWindowScrollDelay && !timerFinishPlay) {
+            runTimerFocusDelay();
+        } else {
+            document.addEventListener('endWinScroll', waitEndingWinScroll);
+
+            function waitEndingWinScroll() {
+                clearTimeout(timerFocusDelay);
+                runTimerFocusDelay();
+
+                document.removeEventListener('endWinScroll', waitEndingWinScroll);
+            }
+        }
+
+        function runTimerFocusDelay() {
+            timerFocusDelay = setTimeout(() => {
+                let preventScroll = (highlightActiveElem == visPlaylistArea) ? true : false;
+
+                highlightActiveElem.focus({preventScroll});
+                highlightActiveElem = null;
+            }, delayTime);
+        }
+    } else {
+        highlightActiveElem = null;
+    }
 }
 
 function removePressedButtons() {
@@ -3488,7 +3500,6 @@ function compensateScrollbarWidth() {
         document.body.clientWidth, document.documentElement.clientWidth
     );
     let scrollbarWidth = winWidth - docWidth;
-    let cssRoot = document.querySelector(':root');
 
     cssRoot.style.setProperty('--scrollbar-width', scrollbarWidth + 'px');
 
