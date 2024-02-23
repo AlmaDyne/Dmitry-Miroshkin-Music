@@ -56,7 +56,7 @@ const ACCELERATION_DELAY = 750;
 const PLAYLIST_FINISH_DELAY = 500;
 const DEFAULT_SCROLL_DURATION = 150;
 const KEY_SCROLL_DURATION = 120;
-const HIGHLIGHT_SELECTED_FOCUS_DELAY = 350;
+const HIGHLIGHT_SELECTED_FOCUS_DELAY = 500;
 let originOrderedAudios = [];
 let curOrderedAudios = [];
 let orderedDownloads = [];
@@ -300,7 +300,7 @@ function createPlaylist(addedTracklist, clearPlaylist) {
         originOrderedAudios.push(audioElem);
     }
     
-    setOriginPlaylistOrder(originOrderedAudios);
+    setOriginPlaylist(originOrderedAudios);
 }
 
 ///////////////////////////////////
@@ -652,7 +652,7 @@ function showLastPlayedTrackInfo() {
     }, 250);
 }
 
-function saveLastAudioInfo(audio) {
+function saveLastPlayedAudioInfo(audio) {
     let lastPlayedAudio = 'last_played_audio=' +
         encodeURIComponent(audio.dataset.artist + ' - ' + audio.dataset.title);
     let lastPlayDate = 'date_of_last_play=' + new Date();
@@ -666,102 +666,18 @@ function saveLastAudioInfo(audio) {
 // Selected track info //
 /////////////////////////
 
-function showTrackInfo(audio) {
+function showTrackInfo(audio, prevSelected) {
     displayInfo.hidden = true;
 
     keepSelectedTitleVisible(audio);
     highlightSelected(audio);
+    if (timeRangeHoverIntent.elemRect) timeRangeHoverIntent.executeTask();
 
-    if (audio !== showTrackInfo.audio) {
-        if (showTrackInfo.audio) {
-            if (showTrackInfo.audio.paused) showTrackInfo.audio.onplaying = () => false;
-            showTrackInfo.audio.onended = () => false;
-            showTrackInfo.audio.onpause = () => false;
-            showTrackInfo.audio.onwaiting = () => false;
-            showTrackInfo.audio.onseeking = () => false;
-        }
+    if (audio !== prevSelected) {
+        if (prevSelected) disconnectAudioHandlers(prevSelected);
+        connectAudioHandlers(audio);
 
-        showTrackInfo.audio = audio;
-
-        audio.onplaying = () => {
-            hideLoading(audio);
-    
-            if (audio === selectedAudio && playOn && !timePosSeeking) {
-                console.log('playing | ' + audio.dataset.title);
-    
-                clearUpdTimers();
-                audio.volume = settedVolume;
-                indicator.classList.add('active');
-    
-                try {
-                    audio.playbackRate = accelerationData[accelerationType].playbackRate;
-                } catch(error) {
-                    console.error(error.name + ': ' + error.message);
-            
-                    if (error.name === 'NotSupportedError') {
-                        acceleratePlaying = false;
-                        audio.pause();
-                    }
-                }
-    
-                runUpdTimers(audio);
-                saveLastAudioInfo(audio);
-            } else {
-                console.log('pause after ready | ' + audio.dataset.title);
-    
-                audio.pause();
-    
-                if (audio !== selectedAudio) audio.onplaying = () => false;
-            }
-        };
-        
-        audio.onended = () => {
-            if (timePosSeeking) return;
-            if (timerFinishPlay) return;
-            if (acceleration && accelerationType === 'fast-rewind') return;
-    
-            if (acceleration && accelerationType === 'fast-forward') {
-                console.log(`track ended in ${accelerationType} | ${audio.dataset.title}`);
-            } else if (!acceleration) {
-                console.log('track ended | ' + audio.dataset.title);
-            }
-    
-            finishTrack(audio);
-        };
-
-        audio.onpause = () => {
-            indicator.classList.remove('active');
-        };
-
-        audio.onwaiting = () => {
-            console.log('waiting | ' + audio.dataset.title);
-
-            clearUpdTimers();
-            showLoading(audio);
-            audio.volume = 0;
-
-            if (acceleration) runUpdTimers(audio);
-        };
-        
-        audio.onseeking = () => {
-            setTimeout(() => {
-                //console.log('seeking... readyState = ' + audio.readyState);
-
-                if (!audio.seeking) return;
-
-                showLoading(audio);
-
-                audio.onseeked = () => {
-                    console.log('seeked! readyState = ' + audio.readyState + ' | ' + audio.dataset.title);
-
-                    hideLoading(audio);
-
-                    audio.onseeked = () => false;
-                };
-            }, LAG); // Audio ready state update delay
-        };
-
-        stopTitlesMoving();
+        clearTitlesMovingTimers();
 
         trackTitleDisplay.textContent = audio.dataset.title;
         artistNameDisplay.textContent = audio.dataset.artist;
@@ -770,34 +686,6 @@ function showTrackInfo(audio) {
         artistNameDisplay.style.left = '';
 
         moveTitles(trackTitleDisplay, artistNameDisplay);
-
-        function moveTitles(...titles) {
-            for (let title of titles) {
-                let boxWidth = player.querySelector('.selected-track').offsetWidth;
-                let titleWidth = title.offsetWidth;
-                if (titleWidth <= boxWidth) return;
-
-                title.style.left = 0;
-        
-                let timerTitleMove = setTimeout(() => {
-                    let diffWidth = boxWidth - titleWidth;
-                    let pos = 0;
-        
-                    timerTitleMove = requestAnimationFrame(function shiftTitle() {
-                        title.style.left = --pos + 'px';
-        
-                        if (pos <= diffWidth) {
-                            timerTitleMove = setTimeout(moveTitles, 1500, title);
-                        } else {
-                            timerTitleMove = requestAnimationFrame(shiftTitle);
-                        }
-                        titleMoveTimers[title.id + '-timer'] = timerTitleMove;
-                    });
-                    titleMoveTimers[title.id + '-timer'] = timerTitleMove;
-                }, 1000);
-                titleMoveTimers[title.id + '-timer'] = timerTitleMove;
-            }
-        }
     }
     
     if (audio.duration) {
@@ -825,6 +713,122 @@ function showTrackInfo(audio) {
     }
 
     updateTimeline(audio);
+}
+
+function connectAudioHandlers(audio) {
+    audio.onplaying = () => {
+        hideLoading(audio);
+
+        if (audio === selectedAudio && playOn && !timePosSeeking) {
+            console.log('playing | ' + audio.dataset.title);
+
+            clearUpdTimers();
+            audio.volume = settedVolume;
+            indicator.classList.add('active');
+
+            try {
+                audio.playbackRate = accelerationData[accelerationType].playbackRate;
+            } catch(error) {
+                console.error(error.name + ': ' + error.message);
+        
+                if (error.name === 'NotSupportedError') {
+                    acceleratePlaying = false;
+                    audio.pause();
+                }
+            }
+
+            runUpdTimers(audio);
+            saveLastPlayedAudioInfo(audio);
+        } else {
+            console.log('pause after ready | ' + audio.dataset.title);
+
+            audio.pause();
+
+            if (audio !== selectedAudio) audio.onplaying = () => false;
+        }
+    };
+    
+    audio.onended = () => {
+        if (timePosSeeking) return;
+        if (timerFinishPlay) return;
+        if (acceleration && accelerationType === 'fast-rewind') return;
+
+        if (acceleration && accelerationType === 'fast-forward') {
+            console.log(`track ended in ${accelerationType} | ${audio.dataset.title}`);
+        } else if (!acceleration) {
+            console.log('track ended | ' + audio.dataset.title);
+        }
+
+        finishTrack(audio);
+    };
+
+    audio.onpause = () => {
+        indicator.classList.remove('active');
+    };
+
+    audio.onwaiting = () => {
+        console.log('waiting | ' + audio.dataset.title);
+
+        clearUpdTimers();
+        showLoading(audio);
+        audio.volume = 0;
+
+        if (acceleration) runUpdTimers(audio);
+    };
+    
+    audio.onseeking = () => {
+        setTimeout(() => {
+            //console.log('seeking... readyState = ' + audio.readyState);
+
+            if (!audio.seeking) return;
+
+            showLoading(audio);
+
+            audio.onseeked = () => {
+                console.log('seeked! readyState = ' + audio.readyState + ' | ' + audio.dataset.title);
+
+                hideLoading(audio);
+
+                audio.onseeked = () => false;
+            };
+        }, LAG); // Audio ready state update delay
+    };
+}
+
+function disconnectAudioHandlers(audio) {
+    if (audio.paused) audio.onplaying = () => false;
+    audio.onended = () => false;
+    audio.onpause = () => false;
+    audio.onwaiting = () => false;
+    audio.onseeking = () => false;
+}
+
+function moveTitles(...titles) {
+    for (let title of titles) {
+        let boxWidth = player.querySelector('.selected-track').offsetWidth;
+        let titleWidth = title.offsetWidth;
+        if (titleWidth <= boxWidth) return;
+
+        title.style.left = 0;
+
+        let timerTitleMove = setTimeout(() => {
+            let diffWidth = boxWidth - titleWidth;
+            let pos = 0;
+
+            timerTitleMove = requestAnimationFrame(function shiftTitle() {
+                title.style.left = --pos + 'px';
+
+                if (pos <= diffWidth) {
+                    timerTitleMove = setTimeout(moveTitles, 1500, title);
+                } else {
+                    timerTitleMove = requestAnimationFrame(shiftTitle);
+                }
+                titleMoveTimers[title.id + '-timer'] = timerTitleMove;
+            });
+            titleMoveTimers[title.id + '-timer'] = timerTitleMove;
+        }, 1000);
+        titleMoveTimers[title.id + '-timer'] = timerTitleMove;
+    }
 }
 
 //////////////////////////////////
@@ -992,7 +996,6 @@ function upKeyStepAccAction(key) {
             } else {
                 if (!canceledStepAccKeys.has(key)) {
                     if (!timePosSeeking) stepKeysData[key].stepFunction();
-                    runAcceleration();
                 } else {
                     canceledStepAccKeys.delete(key);
                 }
@@ -1036,41 +1039,46 @@ function rewindAction() {
         setSelected(selectedAudio);
         showTrackInfo(selectedAudio);
         if (timeRangeEnter) enterTimeRange();
-        if (timeRangeHoverIntent.elemRect) timeRangeHoverIntent.executeTask();
         return;
     }
 
     clearFinPlayTimer();
-    clearUpdTimers();
-
-    if (playOn) pauseAudio(selectedAudio);
 
     if (
         (selectedAudio.duration && selectedAudio.currentTime <= 3) ||
         (!selectedAudio.duration && !timelinePos)
-    ) { 
+    ) {
+        if (playOn) pauseAudio(selectedAudio);
+
+        let prevSelectedAudio = selectedAudio;
         let idx = curOrderedAudios.findIndex(aud => aud === selectedAudio);
         let prevAudio = curOrderedAudios[--idx];
         
         removeSelected(selectedAudio);
-        selectedAudio = (prevAudio) ? prevAudio : curOrderedAudios[curOrderedAudios.length - 1];
+        selectedAudio = prevAudio ? prevAudio : curOrderedAudios[curOrderedAudios.length - 1];
         setSelected(selectedAudio);
 
         console.log('step-rewind track selecting | ' + selectedAudio.dataset.title);
+
+        prevSelectedAudio.currentTime = 0;
+        selectedAudio.currentTime = 0;
+        timelinePos = 0;
+        
+        showTrackInfo(selectedAudio, prevSelectedAudio);
+    
+        if (playOn) {
+            playAudio(selectedAudio);
+        } else if (acceleration) {
+            runUpdTimers(selectedAudio);
+        }
     } else {
         console.log('skip to start | ' + selectedAudio.dataset.title);
-    }
 
-    timelinePos = 0;
-    selectedAudio.currentTime = 0;
-    
-    showTrackInfo(selectedAudio);
-    if (timeRangeHoverIntent.elemRect) timeRangeHoverIntent.executeTask();
+        selectedAudio.currentTime = 0;
+        timelinePos = 0;
 
-    if (playOn) {
-        playAudio(selectedAudio);
-    } else if (acceleration) {
-        runUpdTimers(selectedAudio);
+        if (selectedAudio.duration) updateTime(selectedAudio);
+        updateTimeline(selectedAudio);
     }
 }
 
@@ -1084,7 +1092,6 @@ function forwardAction() {
         setSelected(selectedAudio);
         showTrackInfo(selectedAudio);
         if (timeRangeEnter) enterTimeRange();
-        if (timeRangeHoverIntent.elemRect) timeRangeHoverIntent.executeTask();
         return;
     }
 
@@ -1093,6 +1100,7 @@ function forwardAction() {
 
     if (playOn) pauseAudio(selectedAudio);
     
+    let prevSelectedAudio = selectedAudio;
     let idx = curOrderedAudios.findIndex(aud => aud === selectedAudio);
     let nextAudio = curOrderedAudios[++idx];
 
@@ -1102,12 +1110,11 @@ function forwardAction() {
 
     console.log('step-forward track selecting | ' + selectedAudio.dataset.title);
 
-    timelinePos = 0;
+    prevSelectedAudio.currentTime = 0;
     selectedAudio.currentTime = 0;
+    timelinePos = 0;
 
-    showTrackInfo(selectedAudio);
-
-    if (timeRangeHoverIntent.elemRect) timeRangeHoverIntent.executeTask();
+    showTrackInfo(selectedAudio, prevSelectedAudio);
 
     if (playOn) {
         playAudio(selectedAudio);
@@ -1154,7 +1161,6 @@ function accelerate(audio, accType) {
 
     if (!timePosSeeking) runUpdTimers(audio);
 
-    if (!highlightActiveElem) highlightActiveElem = document.activeElement;
     highlightSelected(selectedAudio);
 }
 
@@ -1186,6 +1192,12 @@ function stopAcceleration() {
             updateTime(selectedAudio);
         }
     }
+
+    if (settingsArea.classList.contains('active')) {
+        rememberAndReturnFocus(0);
+    } else {
+        highlightActiveElem = null;
+    }
 }
 
 function stopAccelerationAndClear() {
@@ -1214,7 +1226,6 @@ function playPauseAction() {
         setSelected(selectedAudio);
         showTrackInfo(selectedAudio);
         if (timeRangeEnter) enterTimeRange();
-        if (timeRangeHoverIntent.elemRect) timeRangeHoverIntent.executeTask();
     } else {
         highlightSelected(selectedAudio);
     }
@@ -1285,7 +1296,11 @@ function playAudio(audio) { // playOn = true
         audio.preservesPitch = false;
         acceleratePlaying = true;
 
-        audio.play();
+        audio.play().catch(error => {
+            if (error.name != 'AbortError') {
+                console.error(error);
+            }
+        });
 
         audio.oncanplaythrough = () => false;
     }
@@ -1324,10 +1339,10 @@ function updateTime(audio, displayStr) {
     if (audio) {
         console.log(audio.currentTime + ' | ' + audio.dataset.title);
 
-        let mins = (roundTime) ?
+        let mins = roundTime ?
             Math.floor(Math.round(audio.currentTime) / 60) :
             Math.floor(audio.currentTime / 60);
-        let secs = (roundTime) ?
+        let secs = roundTime ?
             Math.round(audio.currentTime - mins * 60) :
             Math.floor(audio.currentTime - mins * 60);
     
@@ -1367,7 +1382,7 @@ function updateDuration(audio, displayStr) {
 }
 
 function updateTimeline(audio) {
-    let timelineWidth = (audio.duration) ?
+    let timelineWidth = audio.duration ?
         audio.currentTime / audio.duration * 100 :
         timelinePos / timeRange.offsetWidth * 100;
     
@@ -1375,7 +1390,7 @@ function updateTimeline(audio) {
 }
 
 function runUpdTimers(audio) {
-    let rateFactor = (acceleration) ? ACCELERATION_FACTOR : 1;
+    let rateFactor = acceleration ? ACCELERATION_FACTOR : 1;
     let timelineUpdInterval = TIMELINE_UPDATE_INTERVAL / rateFactor;
     let isTrackFinished;
 
@@ -1432,22 +1447,19 @@ function runUpdTimers(audio) {
     }
 
     function runUpdTimeline_noDuration(audio) {
-        let posPercent = timelinePos / timeRange.offsetWidth * 100;
-
         timerTimelineUpd = setInterval(() => {
             switch (accelerationType) {
                 case 'fast-forward':
-                    posPercent += TIMELINE_POSITION_CHANGE_STEP;
-                    isTrackFinished = posPercent >= 100;
+                    timeline.style.width = `calc(${timeline.offsetWidth}px + ${TIMELINE_POSITION_CHANGE_STEP}%)`;
+                    timelinePos = timeline.offsetWidth - TIMELINE_MARGIN;
+                    isTrackFinished = timelinePos >= timeRange.offsetWidth;
                     break;
                 case 'fast-rewind':
-                    posPercent -= TIMELINE_POSITION_CHANGE_STEP;
-                    isTrackFinished = posPercent <= 0;
+                    timeline.style.width = `calc(${timeline.offsetWidth}px - ${TIMELINE_POSITION_CHANGE_STEP}%)`;
+                    timelinePos = timeline.offsetWidth - TIMELINE_MARGIN;
+                    isTrackFinished = timelinePos <= 0;
                     break;
             }
-
-            timeline.style.width = `calc(${TIMELINE_MARGIN}px + calc(${posPercent}%)`;
-            timelinePos = timeRange.offsetWidth * posPercent / 100;
 
             if (isTrackFinished) {
                 console.log(`track ended in ${accelerationType} (no duration) | ${audio.dataset.title}`);
@@ -1502,6 +1514,8 @@ function finishTrack(audio) {
     }
 
     function playFollowingAudio(followingAudio) {
+        let prevSelectedAudio = selectedAudio;
+
         removeSelected(selectedAudio);
         selectedAudio = followingAudio;
         setSelected(selectedAudio);
@@ -1509,22 +1523,15 @@ function finishTrack(audio) {
         console.log('following track selecting | ' + selectedAudio.dataset.title);
 
         if (!acceleration || (acceleration && accelerationType === 'fast-forward')) {
-            timelinePos = 0;
+            prevSelectedAudio.currentTime = 0;
             selectedAudio.currentTime = 0;
+            timelinePos = 0;
         } else if (acceleration && accelerationType === 'fast-rewind') { 
-            timelinePos = timeRange.offsetWidth;
             if (selectedAudio.duration) selectedAudio.currentTime = selectedAudio.duration;
+            timelinePos = timeRange.offsetWidth;
         }
 
-        if (!settingsArea.hidden && !acceleration) {
-            clearTimeout(timerFocusDelay);
-            if (!highlightActiveElem) highlightActiveElem = document.activeElement;
-            returnFocus(HIGHLIGHT_SELECTED_FOCUS_DELAY);
-        }
-
-        showTrackInfo(selectedAudio);
-
-        if (timeRangeHoverIntent.elemRect) timeRangeHoverIntent.executeTask();
+        showTrackInfo(selectedAudio, prevSelectedAudio);
 
         if (playOn) {
             playAudio(selectedAudio);
@@ -1538,9 +1545,11 @@ function finishPlaying() {
     console.log('finish playing');
     
     setPauseState();
-    highlightSelected(selectedAudio);
-    stopTitlesMoving();
+    clearTitlesMovingTimers();
     if (acceleration) stopAcceleration();
+
+    timerFinishPlay = true; // For return focus check
+    highlightSelected(selectedAudio);
 
     timerFinishPlay = setTimeout(() => {
         stopAccelerationAndClear();
@@ -1563,22 +1572,14 @@ function finishPlaying() {
             delete timeRange.pointerId;
         }
 
+        selectedAudio.currentTime = 0;
         timelinePos = 0;
-        originOrderedAudios.forEach(aud => aud.currentTime = 0);
         
-        if (showTrackInfo.audio.paused) selectedAudio.onplaying = () => false;
-        selectedAudio.onended = () => false;
-        selectedAudio.onpause = () => false;
-        selectedAudio.onwaiting = () => false;
-        selectedAudio.onseeking = () => false;
-
         removeSelected(selectedAudio);
-        delete showTrackInfo.audio;
+        disconnectAudioHandlers(selectedAudio);
         selectedAudio = undefined;
 
         (function resetScrollPositions() {
-            let isFocusTimer = highlightActiveElem ? true : false;
-            let activeElem = isFocusTimer ? highlightActiveElem : document.activeElement;
             let winScrollDuration = LAG;
             let curPlaylistScrollTop = false;
 
@@ -1593,19 +1594,14 @@ function finishPlaying() {
                 winScrollDuration += DEFAULT_SCROLL_DURATION;
             }
 
-            clearTimeout(timerFocusDelay);
-            highlightActiveElem = null;
-
             curPlaylist.select();
             curPlaylist.setSelectionRange(0, 0);
-            if (activeElem != curPlaylist) curPlaylist.blur();
+            if (curPlaylist != highlightActiveElem) curPlaylist.blur();
 
             if (curPlaylist.scrollTop) {
                 curPlaylistScrollTop = true;
                 curPlaylist.scrollTop = 0;
             }
-
-            if (isFocusTimer) highlightActiveElem = activeElem;
     
             timerWindowScrollDelay = setTimeout(() => {
                 window.scrollTo(0, 0);
@@ -1617,7 +1613,7 @@ function finishPlaying() {
                     } else {
                         curPlaylist.addEventListener('scrollend', function scrollCurPlaylistToEnd() {
                             document.dispatchEvent(endWindowScrolling);
-
+    
                             curPlaylist.removeEventListener('scrollend', scrollCurPlaylistToEnd);
                         });
                     }
@@ -1640,7 +1636,7 @@ function clearUpdTimers() {
     clearInterval(timerTimelineUpd);
 }
 
-function stopTitlesMoving() {
+function clearTitlesMovingTimers() {
     for (let key in titleMoveTimers) {
         cancelAnimationFrame(titleMoveTimers[key]);
         clearInterval(titleMoveTimers[key]);
@@ -1649,6 +1645,8 @@ function stopTitlesMoving() {
 }
 
 function clearFinPlayTimer() {
+    if (timerFinishPlay) moveTitles(trackTitleDisplay, artistNameDisplay);
+
     clearTimeout(timerFinishPlay);
     timerFinishPlay = null;
 }
@@ -1686,13 +1684,9 @@ function shuffleAction() {
     shuffleBtn.classList.toggle('active');
 
     if (shuffleBtn.classList.contains('active')) {
-        console.log('create random playlist');
-
         randomizePlaylist(curOrderedAudios);
     } else {
-        console.log('set default playlist');
-
-        setOriginPlaylistOrder(originOrderedAudios);
+        setOriginPlaylist(originOrderedAudios);
     }
 
     if (selectedAudio) {
@@ -1733,7 +1727,9 @@ function repeatAction() {
     highlightSelected(selectedAudio);
 }
 
-function setOriginPlaylistOrder(audios) {
+function setOriginPlaylist(audios) {
+    console.log('set origin playlist');
+
     curOrderedAudios.length = 0;
 
     let playlistText = 'Current playlist (origin order):\n\n';
@@ -1749,6 +1745,8 @@ function setOriginPlaylistOrder(audios) {
 }
 
 function randomizePlaylist(audios) {
+    console.log('create random playlist');
+
     shuffle(audios);
 
     if (selectedAudio) {
@@ -1759,7 +1757,7 @@ function randomizePlaylist(audios) {
         });
     }
 
-    let playlistText = 'Current playlist (shuffle):\n\n';
+    let playlistText = 'Current playlist (random order):\n\n';
 
     audios.forEach((audio, idx, array) => {
         playlistText += (idx + 1) + '. ' + audio.dataset.artist + ' \u2013 ' + audio.dataset.title;
@@ -1854,8 +1852,6 @@ function changeVolumeAction(changeType, keyRepeat) {
 volumeBtn.onclick = volumeAction;
 
 function volumeAction() {
-    highlightSelected(selectedAudio);
-    
     if (volumeBtn.classList.contains('active')) {
         savedVolume = settedVolume;
         settedVolume = 0;
@@ -1879,6 +1875,8 @@ function volumeAction() {
         volumeline.style.width = volumePos + volumeBar.offsetWidth / 2 + 'px';
         volumeBar.style.left = volumePos + 'px';
     }
+
+    highlightSelected(selectedAudio);
 }
 
 volumeRange.onclick = () => false;
@@ -2019,22 +2017,33 @@ visPlaylistArea.onclick = (event) => {
         playAudio(selectedAudio);
         return;
     }
-    
-    clearFinPlayTimer();
-    clearUpdTimers();
 
-    if (playOn) pauseAudio(selectedAudio);
+    clearFinPlayTimer();
 
     if (newAudio != selectedAudio) {
+        clearUpdTimers();
+    
+        if (playOn) pauseAudio(selectedAudio);
+    
+        let prevSelectedAudio = selectedAudio;
+
         removeSelected(selectedAudio);
         selectedAudio = newAudio;
         setSelected(selectedAudio);
+
+        prevSelectedAudio.currentTime = 0;
+        selectedAudio.currentTime = 0;
+        timelinePos = 0;
+    
+        showTrackInfo(selectedAudio, prevSelectedAudio);
+    } else {
+        selectedAudio.currentTime = 0;
+        timelinePos = 0;
+
+        updateTime(selectedAudio);
+        updateTimeline(selectedAudio);
     }
 
-    timelinePos = 0;
-    selectedAudio.currentTime = 0;
-
-    showTrackInfo(selectedAudio);
     playAudio(selectedAudio);
 };
 
@@ -2974,11 +2983,21 @@ function showSettings(eventType) {
     setTimeout(() => {
         settingsArea.classList.add('active');
         highlightSelected(selectedAudio);
+        
+        if (!selectedAudio) {
+            let activeElem = document.activeElement;
+
+            curPlaylist.select();
+            curPlaylist.setSelectionRange(0, 0);
+            if (curPlaylist != activeElem) curPlaylist.blur();
+            curPlaylist.scrollTop = 0;
+
+            activeElem.focus();
+        }
     }, activeTime);
 }
 
 function hideSettings() {
-    highlightSelected(selectedAudio);
     settingsArea.classList.remove('active');
 
     let transTime = parseFloat(getComputedStyle(settingsArea).transitionDuration) * 1000;
@@ -3024,16 +3043,12 @@ function highlightSelected(audio) {
     let strLength = fixedStr.length;
     let startPos = curPlaylist.value.indexOf(fixedStr);
     let endPos = (fixedStr.at(-1) == '\n') ? startPos + strLength - 1 : startPos + strLength;
-    let isFocusTimer = highlightActiveElem ? true : false;
-    let activeElem = isFocusTimer ? highlightActiveElem : document.activeElement;
-
-    highlightActiveElem = null; // For onfocus event check on curPlaylist
+    
+    rememberAndReturnFocus(HIGHLIGHT_SELECTED_FOCUS_DELAY);
 
     curPlaylist.select();
     curPlaylist.setSelectionRange(startPos, endPos, 'forward');
-    if (activeElem != curPlaylist) curPlaylist.blur();
-
-    if (isFocusTimer) highlightActiveElem = activeElem;
+    if (curPlaylist != highlightActiveElem) curPlaylist.blur();
 
     // Scrolling to center textarea
     if (curPlaylist.scrollHeight <= curPlaylist.clientHeight) return;
@@ -3054,6 +3069,44 @@ function highlightSelected(audio) {
     }
 
     curPlaylist.scrollTop = (rows - Math.ceil((visibleRows - selectedRows) / 2)) * rowHeight;
+}
+
+// Returning focus to the last active element after highlighting the selected audio
+function rememberAndReturnFocus(delayTime) {
+    clearTimeout(timerFocusDelay);
+    if (!highlightActiveElem) highlightActiveElem = document.activeElement;
+    if (acceleration) return;
+
+    if (!timerWindowScrollDelay && !timerFinishPlay) {
+        runTimerFocusDelay();
+    } else {
+        document.addEventListener('endWinScroll', waitEndingWinScroll);
+
+        function waitEndingWinScroll() {
+            clearTimeout(timerFocusDelay);
+            runTimerFocusDelay();
+
+            document.removeEventListener('endWinScroll', waitEndingWinScroll);
+        }
+    }
+
+    function runTimerFocusDelay() {
+        timerFocusDelay = setTimeout(() => {
+            let preventScroll = (highlightActiveElem == visPlaylistArea) ? true : false;
+
+            highlightActiveElem.focus({preventScroll});
+            highlightActiveElem = null;
+        }, delayTime);
+    }
+}
+
+function cancelReturningFocus() {
+    if (timerFinishPlay) {
+        highlightActiveElem = document.activeElement;
+    } else {
+        clearTimeout(timerFocusDelay);
+        highlightActiveElem = null;
+    }
 }
 
 defaultSetBtn.onclick = () => {
@@ -3118,14 +3171,8 @@ function hidePreload() {
 
 // Highlighting selected track in current playlist
 document.addEventListener('click', (event) => {
-    // If document.activeElement = document.body 
-    if (highlightActiveElem) {
-        if (timerFinishPlay) {
-            highlightActiveElem = document.activeElement;
-        } else {
-            clearTimeout(timerFocusDelay);
-            highlightActiveElem = null;
-        }
+    if (document.activeElement == document.body && highlightActiveElem) {
+        cancelReturningFocus();
     }
 
     if (event.target.closest('#settings-area')) return;
@@ -3211,13 +3258,8 @@ for (let elem of document.querySelectorAll('input, button, textarea, #visible-pl
             }
         }
 
-        if (highlightActiveElem) {
-            if (timerFinishPlay) {
-                highlightActiveElem = this;
-            } else {
-                clearTimeout(timerFocusDelay);
-                highlightActiveElem = null;
-            }
+        if (this != curPlaylist && highlightActiveElem) {
+            cancelReturningFocus();
         }
 
         if (pointerModeScrolling) document.dispatchEvent(new Event('pointermove'));
@@ -3328,11 +3370,8 @@ function promiseChange(btn, key, time, func) {
     );
 }
 
-// Highlighting the pressed button and returning focus to the last active element 
-// after highlighting the selected audio
+// Highlighting the pressed button
 function highlightButton(btn, key, actionFunc, arg) {
-    let startPressTime = performance.now();
-
     highlightedBtns.set(key, btn);
 
     if (actionFunc == downKeyStepAccAction) {
@@ -3365,53 +3404,12 @@ function highlightButton(btn, key, actionFunc, arg) {
             return true;
         }
 
-        clearTimeout(timerFocusDelay);
-
-        if (!highlightActiveElem) highlightActiveElem = document.activeElement;
-
-        let delayTime = HIGHLIGHT_SELECTED_FOCUS_DELAY;
-
         if (actionFunc == downKeyStepAccAction) {
-            let pressTime = performance.now() - startPressTime;
-            delayTime = (pressTime < ACCELERATION_DELAY) ? delayTime : 0;
-
             upKeyStepAccAction(key);
         } else {
             actionFunc(arg);
         }
-
-        returnFocus(delayTime);
     });
-}
-
-function returnFocus(delayTime) {
-    if (selectedAudio && !settingsArea.hidden) {
-        if (acceleration) return;
-        
-        if (!timerWindowScrollDelay && !timerFinishPlay) {
-            runTimerFocusDelay();
-        } else {
-            document.addEventListener('endWinScroll', waitEndingWinScroll);
-
-            function waitEndingWinScroll() {
-                clearTimeout(timerFocusDelay);
-                runTimerFocusDelay();
-
-                document.removeEventListener('endWinScroll', waitEndingWinScroll);
-            }
-        }
-
-        function runTimerFocusDelay() {
-            timerFocusDelay = setTimeout(() => {
-                let preventScroll = (highlightActiveElem == visPlaylistArea) ? true : false;
-
-                highlightActiveElem.focus({preventScroll});
-                highlightActiveElem = null;
-            }, delayTime);
-        }
-    } else {
-        highlightActiveElem = null;
-    }
 }
 
 function removePressedButtons() {

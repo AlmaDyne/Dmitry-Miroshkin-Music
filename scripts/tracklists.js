@@ -27,12 +27,12 @@ export let tracklistsData = {
         },
         {
             artist: 'Zmicier M. (feat. ATD)',
-            title: 'Harpsichords Attack!',
+            title: 'Thousand Miles (of Drinking)',
             src: 'music/Experiments and Parodies/6.mp3'
         },
         {
-            artist: 'Zmicier M. (feat. ATD)',
-            title: 'Thousand Miles (of Drinking)',
+            artist: 'Dmitry Miroshkin',
+            title: 'Early Autumn (feat. Anthony Driverson)',
             src: 'music/Experiments and Parodies/7.mp3'
         },
         {
