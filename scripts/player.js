@@ -1,4 +1,4 @@
-import { tracklistsData } from '../scripts/tracklists.js';
+import { tracklistData } from '../scripts/tracklist.js';
 import { configClassic } from '../scripts/controls-config-classic.js';
 import { configStylish } from '../scripts/controls-config-stylish.js';
 import { PlayerButtonsHoverIntent } from '../scripts/player-buttons-hover-intent.js';
@@ -99,7 +99,7 @@ let endWindowScrolling = new CustomEvent('endWinScroll');
 let selectedAudio;
 
 const DEFAULTS_DATA = {
-    'tracklist': tracklistsData['Experiments and Parodies'],
+    'tracklist': tracklistData['Experiments and Parodies'],
     'visible-tracks__classic-config': 7,
     'visible-tracks__stylish-config': 5,
     'player_volume': 0.75,
