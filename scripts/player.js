@@ -515,7 +515,7 @@ function changeNumberOfVisibleTracks(value) {
     localStorage.setItem('number_of_visible_tracks', numOfVisTracks);
     localStorage.setItem('checked-visible-tracks-box', checkedVisibleTracksBox);
 
-    checkScrollElemsPosition();
+    checkPlaylistPosition();
     compensateScrollbarWidth();
 
     if (accelerateScrolling) {
@@ -965,12 +965,16 @@ for (let button of [rewindBtn, forwardBtn]) {
     };
 
     button.oncontextmenu = (event) => {
-        if (event.pointerType == 'touch' || event.pointerType == 'pen') return false;
+        if (event.pointerType != 'mouse') return false;
     }
 
     button.onpointercancel = () => {
         clearTimeout(timerAccelerateAudioDelay);
         if (acceleration) stopAcceleration();
+
+        curAccelerateKey = null;
+        activeStepAccKeys.clear();
+        canceledStepAccKeys.clear();
     };
 }
 
@@ -1077,6 +1081,7 @@ function rewindAction() {
         selectedAudio.currentTime = 0;
         timelinePos = 0;
 
+        keepSelectedTitleVisible(selectedAudio);
         if (selectedAudio.duration) updateTime(selectedAudio);
         updateTimeline(selectedAudio);
     }
@@ -1953,19 +1958,20 @@ visPlaylistArea.onpointerover = (event) => {
 
     let trackTitle = event.target;
     let titleWidth = trackTitle.offsetWidth;
-    let titleLeft = trackTitle.getBoundingClientRect().left;
-    let playlistLimLeft = playlistLim.getBoundingClientRect().left;
+    let titleLeft = trackTitle.getBoundingClientRect().left + window.scrollX;
+    let playlistLimLeft = playlistLim.getBoundingClientRect().left + window.scrollX;
     let docWidth = Math.max(
         document.body.scrollWidth, document.documentElement.scrollWidth,
         document.body.offsetWidth, document.documentElement.offsetWidth,
         document.body.clientWidth, document.documentElement.clientWidth
     );
+    let shift = isTouchDevice ? 1 : 0; // Bug on some mobile devices
 
     if (titleLeft - playlistLimLeft + titleWidth > playlistLim.offsetWidth) {
         playlistLim.style.width = titleLeft - playlistLimLeft + titleWidth + 'px';
     }
     if (titleLeft + titleWidth > docWidth) {
-        playlistLim.style.width = docWidth - playlistLimLeft + 'px';
+        playlistLim.style.width = docWidth - playlistLimLeft - shift + 'px';
     }
 
     trackTitle.parentElement.classList.add('hover');
@@ -2040,6 +2046,7 @@ visPlaylistArea.onclick = (event) => {
         selectedAudio.currentTime = 0;
         timelinePos = 0;
 
+        keepSelectedTitleVisible(selectedAudio);
         updateTime(selectedAudio);
         updateTimeline(selectedAudio);
     }
@@ -2059,7 +2066,8 @@ visPlaylistArea.oncontextmenu = function(event) {
     player.appendChild(trackMenu);
     
     let downloadLink = document.createElement('div');
-    downloadLink.innerHTML = 'Save audio in MP3';
+    downloadLink.className = 'menu-item';
+    downloadLink.innerHTML = 'Save audio as MP3';
     trackMenu.appendChild(downloadLink);
 
     let playerRect = player.getBoundingClientRect(); // player - parent element for trackMenu
@@ -2078,19 +2086,26 @@ visPlaylistArea.oncontextmenu = function(event) {
 
     let audio = event.target.closest('.track').querySelector('audio');
 
-    downloadLink.addEventListener('click', () => {
+    downloadLink.addEventListener('click', clickDownloadLink, {once: true});
+    document.addEventListener('pointerdown', removeTrackMenu);
+
+    function clickDownloadLink() {
         let loadInfoElem = audio.parentElement.querySelector('.load-info');
         if (loadInfoElem) loadInfoElem.remove();
 
         downloadAudio(audio);
+
         trackMenu.remove();
-    }, {once: true});
-        
-    document.addEventListener('pointerdown', (event) => {
+        document.removeEventListener('pointerdown', removeTrackMenu);
+    }
+    
+    function removeTrackMenu(event) {
         if (event.target.closest('.track-menu')) return;
 
         trackMenu.remove();
-    }, {once: true});
+        downloadLink.removeEventListener('click', clickDownloadLink, {once: true});
+        document.removeEventListener('pointerdown', removeTrackMenu);
+    }
 
     async function downloadAudio(audio) {
         let trackElem = audio.parentElement;
@@ -2225,9 +2240,9 @@ visPlaylistArea.oncontextmenu = function(event) {
 ////////////////////////
 
 playlistContainer.onpointerenter = () => {
-    if (playlistLim.scrollHeight <= playlistLim.clientHeight) return;
-
     cursorOverPlaylist = true;
+
+    if (playlistLim.scrollHeight <= playlistLim.clientHeight) return;
 
     clearTimeout(timerHideScrollElements);
 
@@ -2260,9 +2275,9 @@ playlistContainer.onpointerenter = () => {
 };
 
 playlistContainer.onpointerleave = () => {
-    if (playlistLim.scrollHeight <= playlistLim.clientHeight) return;
-
     cursorOverPlaylist = false;
+
+    if (playlistLim.scrollHeight <= playlistLim.clientHeight) return;
 
     let activeElem = document.activeElement;
     let isDocScrollbar = checkDocHeight();
@@ -2546,10 +2561,11 @@ function keepSelectedTitleVisible(audio) {
     // Window scroll alignment
     let playlistLimRect = playlistLim.getBoundingClientRect();
     let winHeight = document.documentElement.clientHeight;
+    let heightShift = (playlistLim.scrollHeight > playlistLim.clientHeight) ? SCROLL_ARROW_BOX_HEIGHT : 0;
 
     if (
-        playlistLimRect.top < SCROLL_ARROW_BOX_HEIGHT ||
-        playlistLimRect.bottom > winHeight - SCROLL_ARROW_BOX_HEIGHT
+        playlistLimRect.top < heightShift ||
+        playlistLimRect.bottom > winHeight - heightShift
     ) {
         clearTimeout(timerWindowScrollDelay);
         timerWindowScrollDelay = null;
@@ -2560,11 +2576,11 @@ function keepSelectedTitleVisible(audio) {
             let scrolledHeight = window.pageYOffset;
             let y;
     
-            if (selTrackDocumentTop < SCROLL_ARROW_BOX_HEIGHT) {
-                y = selTrackDocumentTop - SCROLL_ARROW_BOX_HEIGHT + scrolledHeight;
+            if (selTrackDocumentTop < heightShift) {
+                y = selTrackDocumentTop - heightShift + scrolledHeight;
                 y = Math.floor(y); // For removing arrow box
-            } else if (selTrackDocumentBottom > winHeight - SCROLL_ARROW_BOX_HEIGHT) {
-                y = selTrackDocumentBottom - winHeight + SCROLL_ARROW_BOX_HEIGHT + scrolledHeight;
+            } else if (selTrackDocumentBottom > winHeight - heightShift) {
+                y = selTrackDocumentBottom - winHeight + heightShift + scrolledHeight;
                 y = Math.ceil(y); // For removing arrow box
             }
     
@@ -2978,7 +2994,6 @@ function showSettings(eventType) {
     let activeTime = (eventType == 'keydown' && settingsArea.hidden) ? LAG : 0;
 
     settingsArea.hidden = false;
-    checkSettingsAreaPosition();
 
     setTimeout(() => {
         settingsArea.classList.add('active');
@@ -3011,14 +3026,6 @@ function hideSettings() {
 }
 
 closeSetBtn.onclick = hideSettings;
-
-function checkSettingsAreaPosition() {
-    let shiftSpace = player.offsetTop;
-    let scrolled = window.pageYOffset;
-
-    settingsArea.style.top = (scrolled > shiftSpace) ? (scrolled - shiftSpace + 'px') : '';
-}
-
 
 function highlightSelected(audio) {
     if (!audio) return;
@@ -3425,9 +3432,8 @@ let scrollTicking = false;
 document.addEventListener('scroll', function () {
     if (!scrollTicking) {
         requestAnimationFrame(function () {
-            checkScrollElemsPosition();
-            if (!settingsArea.hidden) checkSettingsAreaPosition();
-
+            checkPlaylistPosition();
+            
             scrollTicking = false;
         });
     }
@@ -3441,7 +3447,7 @@ let resizeTick = false;
 window.addEventListener('resize', () => {
     if (!resizeTick) {
         requestAnimationFrame(function () {
-            checkScrollElemsPosition();
+            checkPlaylistPosition();
             compensateScrollbarWidth();
 
             resizeTick = false;
@@ -3451,16 +3457,15 @@ window.addEventListener('resize', () => {
     resizeTick = true;
 });
 
-
-  
-function checkScrollElemsPosition() {
+function checkPlaylistPosition() {
     let playlistContainerRect = playlistContainer.getBoundingClientRect();
     let playlistLimRect = playlistLim.getBoundingClientRect();
     let winHeight = isTouchDevice ? window.innerHeight : document.documentElement.clientHeight;
+    let heightShift = (playlistLim.scrollHeight > playlistLim.clientHeight) ? 0 : -SCROLL_ARROW_BOX_HEIGHT;
     let playlistLimVisibleTop = 0;
     let playlistLimVisibleBottom = 0;
 
-    if (playlistContainerRect.top < 0) {
+    if (playlistContainerRect.top < heightShift) {
         if (playlistLim.scrollHeight > playlistLim.clientHeight) {
             playlistLimVisibleTop = -playlistLimRect.top + SCROLL_ARROW_BOX_HEIGHT;
         }
@@ -3470,7 +3475,7 @@ function checkScrollElemsPosition() {
         outerScrollArrowsUp.forEach(arrow => arrow.hidden = true);
     }
 
-    if (playlistContainerRect.bottom > winHeight) {
+    if (playlistContainerRect.bottom > winHeight - heightShift) {
         if (playlistLim.scrollHeight > playlistLim.clientHeight) {
             playlistLimVisibleBottom = playlistLimRect.bottom - winHeight + SCROLL_ARROW_BOX_HEIGHT;
         }
