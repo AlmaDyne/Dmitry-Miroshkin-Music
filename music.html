@@ -8,14 +8,25 @@
         <link rel="icon" href="img/icons/favicon.png">
         <link rel="stylesheet" href="styles/fonts.css" type="text/css">
         <link rel="stylesheet" href="styles/style.css" type="text/css">
+        <script src="scripts/libs/inert.min.js"></script>
+        <script src="scripts/libs/scrollyfills.umd.js"></script>
     </head>
-    <body class="background-blur">
+    <body class="background-blur loading">
         <script>
             window.onerror = function(message, url, line, col, error) {
                 //alert(`${message}\nВ ${line}:${col} на ${url}`);
-                console.error(`${message}\nВ ${line}:${col} на ${url}`);
+                //console.error(`${message}\nВ ${line}:${col} на ${url}`);
             };
         </script>
+
+        <div id="preloader" class="modal-overlay active"
+            ><div class="movement-area">
+                <div class="central-point">
+                    <span class="symbol">&#119070;</span>
+                </div>
+            </div>
+        </div>
+
         <header>
             <nav>
                 <div class="navigate smoothed-field">
@@ -26,13 +37,14 @@
                 </div>
             </nav>
         </header>
+
         <main>
-            <div id="player-container" class="loading">
-                <div id="player">
+            <div id="player-container" aria-label="Player" data-initial>
+                <div id="player" role="application">
                     <div class="selected-track">
-                        <div id="display-info" hidden></div>
-                        <div><span id="display-title" class="display"></span></div>
-                        <div><span id="display-artist" class="display"></span></div>
+                        <div id="start-info-display" hidden></div>
+                        <div><span id="title-display" class="display"></span></div>
+                        <div><span id="artist-display" class="display"></span></div>
                     </div>
     
                     <div class="track-time-info">
@@ -43,7 +55,7 @@
                             ><div class="digit">-</div
                             ><div class="digit">-</div>
                         </div>
-                        <div id="time-range" data-tooltip="">
+                        <div id="time-range" data-tooltip>
                             <div id="timeline"></div>
                             <div id="time-bar" hidden></div>
                         </div>
@@ -57,24 +69,24 @@
                     </div>
     
                     <player-controls>
-                        <i slot="play-pause" id="play-pause" class="icon-play" data-tooltip="Play/pause"></i>
+                        <i slot="play-pause" id="play-pause" class="icon-play" data-tooltip="Play/Pause"></i>
                         <i slot="stop" id="stop" class="icon-stop" data-tooltip="Stop"></i>
-                        <i slot="rewind" id="rewind" class="icon-to-start" data-tooltip="Step back/fast-rewind"></i>
-                        <i slot="forward" id="forward" class="icon-to-end" data-tooltip="Step forward/fast-forward"></i>
+                        <i slot="rewind" id="rewind" class="icon-to-start" data-tooltip="Step back/Fast-rewind"></i>
+                        <i slot="forward" id="forward" class="icon-to-end" data-tooltip="Step forward/Fast-forward"></i>
                         <div slot="indicator" id="indicator"></div>
-                        <i slot="shuffle" class="btn-img-wrapper" data-tooltip="Shuffle playlist">
-                            <div id="shuffle" class="circle-background">
+                        <i slot="shuffle" id="shuffle" class="btn-img-wrapper" data-tooltip="Shuffle playlist">
+                            <div class="circle-background">
                                 <img src="img/icons/shuffle_playlist.png" alt="Shuffle Playlist">
                             </div>
                         </i>
-                        <i slot="repeat" class="btn-img-wrapper" data-tooltip="Repeat playlist/track">
-                            <div id="repeat" class="circle-background" data-repeat="none">
+                        <i slot="repeat" id="repeat" class="btn-img-wrapper" data-repeat="none" data-tooltip="Repeat playlist/track">
+                            <div class="circle-background">
                                 <img src="img/icons/repeat_playlist.png" alt="Repeat Playlist">
                             </div>
                         </i>
                         <div slot="volume" class="volume-container">
                             <i id="volume" class="icon-volume" data-tooltip="Volume on/off"></i>
-                            <div id="volume-range" data-tooltip="">
+                            <div id="volume-range" data-tooltip>
                                 <div class="inactive-range"></div>
                                 <div id="volumeline"></div>
                                 <div id="volume-bar"></div>
@@ -83,37 +95,46 @@
                     </player-controls>
     
                     <div id="playlist-container">
-                        <div class="scroll-arrows-box up">
-                            <div class="playlist-scroll-arrow" hidden></div>
-                            <i class="outer-scroll-arrow left icon-up-circled" hidden></i>
-                            <i class="outer-scroll-arrow right icon-up-circled" hidden></i>
+                        <div class="playlist-scroll-arrow-box up">
+                            <div id="playlist-scroll-arrow-up" class="scroll-arrow" hidden></div>
                         </div>
     
                         <div id="visible-playlist-area" tabindex="0">
                             <div id="playlist-limiter">
                                 <div id="playlist">
-                                    <!-- Example track tree
+                                    <!-- Example playlist track tree
+    
                                     <div class="track">
-                                        <audio></audio>
-                                        <div class="loading-figure"></div>
-                                        <div class="screen-limiter">
-                                            <span class="track-title"></span>
+                                        <audio data-id="" data-artist="" data-title="" data-src="" data-dub=""
+                                            src="(data-src)" type="audio/mpeg" preload="none"></audio>
+                                        <div class="additionals">
+                                            <div class="loading-figure"></div>
+                                            <i class="icon-close remove-track" data-tooltip="Remove track"></i>
                                         </div>
-                                        <div class="load-info">
-                                            <div class="progress">
-                                                <div class="status"></div>
+                                        <div class="track-info-box" tabindex="0">
+                                            <div class="artist-name-limiter">
+                                                <span class="artist-name" data-actionable>Artist</span>
                                             </div>
-                                            <div class="display-progress"></div>
+                                            <div class="track-title-limiter">
+                                                <span class="track-title" data-actionable>Title (data-dub)</span>
+                                            </div>
+                                            <div class="load-info">
+                                                <div class="progress">
+                                                    <div class="status"></div>
+                                                </div>
+                                                <div class="display-progress"></div>
+                                            </div>
                                         </div>
-                                    </div>-->
+                                    </div>
+                                    -->
                                 </div>
                             </div>
                         </div>
+                    
+                        <div id="temporary-track-storage" style="outline: 1px solid" hidden></div>
     
-                        <div class="scroll-arrows-box down">
-                            <div class="playlist-scroll-arrow" hidden></div>
-                            <i class="outer-scroll-arrow left icon-down-circled" hidden></i>
-                            <i class="outer-scroll-arrow right icon-down-circled" hidden></i>
+                        <div class="playlist-scroll-arrow-box down">
+                            <div id="playlist-scroll-arrow-down" class="scroll-arrow" hidden></div>
                         </div>
                     </div>
     
@@ -126,41 +147,20 @@
                             <i id="playlist-style" class="icon-align-center" data-tooltip="Playlist style"></i>
                         </div>
                         <div class="center-col">
-                            <span class="version">v1.0.3</span>
+                            <span class="version">v1.4.5 Lite</span>
                         </div>
                         <div class="right-col">
-                            <i id="settings" class="icon-cog-circled" data-tooltip="Settings"></i>
                             <i id="info" class="icon-info" data-tooltip="Assigned keys info"></i>
                         </div>
                     </div>
                 </div>
     
                 <div id="tooltip"></div>
-        
-                <div id="settings-area" hidden>
-                    <textarea id="current-playlist" cols="50" readonly></textarea>
-                    <section class="setting-section">
-                        <input id="visible-tracks-checkbox" type="checkbox"
-                        ><label for="visible-tracks">Set own number of visible tracks (0-999)</label>
-                        <input id="visible-tracks" type="number" min="0" max="999" disabled>
-                    </section>
-                    <section class="setting-section">
-                        <label for="scroll-elements-opacity">Playlist scroll elements opacity (0-100)</label>
-                        <input id="scroll-elements-opacity" type="number" min="0" max="100">
-                    </section>
-                    <section class="setting-section">
-                        <label for="wheel-scroll-step">Wheel scroll step (1-5)</label>
-                        <input id="wheel-scroll-step" type="number" min="1" max="5">
-                    </section>
-                    <button id="default-settings"><i class="icon-wrench"></i> Reset to default</button>
-                    <button id="close-settings" class="button-close"><i class="icon-cancel"></i></button>
-                </div>
     
-                <div id="modal-area" hidden
-                    ><article class="key-info">
-                        <button id="close-info" class="button-close"><i class="icon-cancel"></i></button>
-                        <div class="inner-scroll">
-                            <h2>Assigned Keys</h2>
+                <div id="keys-info-window" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="keys-info-title" hidden
+                    ><article class="keys-info">
+                        <div class="scrollable-area" tabindex="0">
+                            <h2 id="keys-info-title">Assigned Keys</h2>
     
                             <!--Play/Pause-->
                             <section>
@@ -175,8 +175,10 @@
                                             <div class="icon-background"><i class="icon-play"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">play</span> key/button
-                                                <span class="text-emphase-1">starts playing</span> audio.</p>
+                                            <p>
+                                                The <span class="emphase-1">play</span> key<wbr>/<wbr>button
+                                                <span class="emphase-1">starts playing</span> audio.
+                                            </p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -184,13 +186,15 @@
                                             <div class="icon-background"><i class="icon-pause"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">pause</span> key/button
-                                                <span class="text-emphase-1">pauses playing</span> audio.</p>
+                                            <p>
+                                                The <span class="emphase-1">pause</span> key<wbr>/<wbr>button
+                                                <span class="emphase-1">pauses playing</span> audio.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Stop-->
                             <section>
                                 <div class="assigned-keys">
@@ -202,13 +206,15 @@
                                             <div class="icon-background"><i class="icon-stop"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">stop</span> key/button
-                                                <span class="text-emphase-1">stops playing</span> audio.</p>
+                                            <p>
+                                                The <span class="emphase-1">stop</span> key<wbr>/<wbr>button
+                                                <span class="emphase-1">stops playing</span> audio.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Step Forward-->
                             <section>
                                 <div class="assigned-keys">
@@ -222,17 +228,21 @@
                                             <div class="icon-background"><i class="icon-to-end"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">step forward</span> key/button allows the user 
-                                                to <span class="text-emphase-1">skip</span> the <span class="text-emphase-2">
-                                                current</span> audio they are interacting with and <span class="text-emphase-1">start 
-                                                playing</span> the <span class="text-emphase-2">next one</span> in the list.</p>
-                                            <p>The sound playback state is <span class="text-emphase-3">preserved</span> 
-                                                in this case.</p>
+                                            <p>
+                                                The <span class="emphase-1">step forward</span> key<wbr>/<wbr>button allows the user 
+                                                to <span class="emphase-1">skip</span> the <span class="emphase-2">
+                                                current</span> audio they are interacting with and <span class="emphase-1">start 
+                                                playing</span> the <span class="emphase-2">next one</span> in the list.
+                                            </p>
+                                            <p>
+                                                The sound playback state is <span class="emphase-3">preserved</span> 
+                                                in this case.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Step Back-->
                             <section>
                                 <div class="assigned-keys">
@@ -246,30 +256,34 @@
                                             <div class="icon-background"><i class="icon-to-start"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>If the user presses/clicks the <span class="text-emphase-1">step back</span> 
-                                                key/button <span class="text-emphase-3">at the beginning</span> of playing audio, 
-                                                it will <span class="text-emphase-1">skip to the beginning</span> of the 
-                                                <span class="text-emphase-2">previous</span> audio track. If the user presses/clicks 
-                                                this key/button <span class="text-emphase-3">during</span> audio track, it will 
-                                                <span class="text-emphase-1">jump to the start</span> of 
-                                                <span class="text-emphase-2">that</span> audio track.</p>
-                                            <p>The sound playback state is <span class="text-emphase-3">preserved</span> 
-                                                in any of these cases.</p>
+                                            <p>
+                                                If the user presses<wbr>/<wbr>clicks the <span class="emphase-1">step back</span> 
+                                                key<wbr>/<wbr>button <span class="emphase-3">at the beginning</span> of playing audio, 
+                                                it will <span class="emphase-1">skip to the beginning</span> of the 
+                                                <span class="emphase-2">previous</span> audio track. If the user presses<wbr>/<wbr>clicks 
+                                                this key<wbr>/<wbr>button <span class="emphase-3">during</span> audio track, it will 
+                                                <span class="emphase-1">jump to the start</span> of 
+                                                <span class="emphase-2">that</span> audio track.
+                                            </p>
+                                            <p>
+                                                The sound playback state is <span class="emphase-3">preserved</span> 
+                                                in any of these cases.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Fast-Forward-->
                             <section>
                                 <div class="assigned-keys">
                                     <figure>
-                                        <figcaption><span class="text-emphase-1">Hold</span></figcaption>
+                                        <figcaption><span class="emphase-1">Hold</span></figcaption>
                                         <img src="img/keyboard_keys/d.png" alt="Key D">
                                     </figure>
                                     /
                                     <figure>
-                                        <figcaption><span class="text-emphase-1">Hold</span></figcaption>
+                                        <figcaption><span class="emphase-1">Hold</span></figcaption>
                                         <img src="img/keyboard_keys/arrow-4.png" alt="Key ArrowRight">
                                     </figure>
                                 </div>
@@ -279,30 +293,37 @@
                                             <div class="icon-background"><i class="icon-fast-forward"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">fast-forward</span> key/button allows the user 
-                                                to <span class="text-emphase-1">go fast-forward</span>. If the user holds down 
-                                                this key/button, it will start to move through the audio <span class="text-emphase-3">
-                                                faster than the playback speed</span> in the <span class="text-emphase-1">forward
-                                                </span> direction.</p>
-                                            <p>When the audio <span class="text-emphase-1">reaches the end</span>, it will jump 
-                                                to the <span class="text-emphase-2">next</span> audio.</p>
-                                            <p>The sound playback state is <span class="text-emphase-3">preserved</span> 
-                                                in any of these cases.</p>
+                                            <p>
+                                                The <span class="emphase-1">fast-forward</span> key<wbr>/<wbr>button allows the user 
+                                                to <span class="emphase-1">go fast-forward</span>. If the user holds down 
+                                                this key<wbr>/<wbr>button, it will start to move through the audio <span class="emphase-3">
+                                                faster than the playback speed</span> in the <span class="emphase-1">forward
+                                                </span> direction.
+                                            </p>
+                                            <p>
+                                                When the audio <span class="emphase-3">reaches the end</span>, it will 
+                                                <span class="emphase-1">jump</span> to the <span class="emphase-2">next</span> 
+                                                audio.
+                                            </p>
+                                            <p>
+                                                The sound playback state is <span class="emphase-3">preserved</span> 
+                                                in any of these cases.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Fast-Rewind-->
                             <section>
                                 <div class="assigned-keys">
                                     <figure>
-                                        <figcaption><span class="text-emphase-1">Hold</span></figcaption>
+                                        <figcaption><span class="emphase-1">Hold</span></figcaption>
                                         <img src="img/keyboard_keys/a.png" alt="Key A">
                                     </figure>
                                     /
                                     <figure>
-                                        <figcaption><span class="text-emphase-1">Hold</span></figcaption>
+                                        <figcaption><span class="emphase-1">Hold</span></figcaption>
                                         <img src="img/keyboard_keys/arrow-1.png" alt="Key ArrowLeft">
                                     </figure>
                                 </div>
@@ -312,25 +333,32 @@
                                             <div class="icon-background"><i class="icon-fast-backward"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>Holding down the <span class="text-emphase-1">fast-rewind</span> key/button allows 
-                                                the user to <span class="text-emphase-1">rewind</span> audio backward. This is 
-                                                helpful when the user wants to <span class="text-emphase-3">go back</span> to a 
-                                                specific moment in the audio.</p>
-                                            <p>When the audio <span class="text-emphase-1">reaches the beginning</span>, it will 
-                                                jump to the <span class="text-emphase-2">previous</span> audio.</p>
-                                            <p>The sound playback state is <span class="text-emphase-3">preserved</span> 
-                                                in any of these cases.</p>
+                                            <p>
+                                                Holding down the <span class="emphase-1">fast-rewind</span> key<wbr>/<wbr>button allows 
+                                                the user to <span class="emphase-1">rewind</span> audio backward. This is 
+                                                helpful when the user wants to <span class="emphase-3">go back</span> to a 
+                                                specific moment in the audio.
+                                            </p>
+                                            <p>
+                                                When the audio <span class="emphase-3">reaches the beginning</span>, it will 
+                                                <span class="emphase-1">jump</span> to the <span class="emphase-2">previous</span> 
+                                                audio.
+                                            </p>
+                                            <p>
+                                                The sound playback state is <span class="emphase-3">preserved</span> 
+                                                in any of these cases.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Volume On/Off-->
                             <section>
                                 <div class="assigned-keys">
                                     <img src="img/keyboard_keys/r.png" alt="Key R">
                                     /
-                                    <img src="img/keyboard_keys/m.png" alt="Key M">
+                                    <img src="img/keyboard_keys/v.png" alt="Key V">
                                 </div>
                                 <div class="relevant-functions">
                                     <div class="row">
@@ -338,20 +366,22 @@
                                             <div class="icon-background"><i class="icon-volume"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">volume</span> key/button turns the sound 
-                                                <span class="text-emphase-1">on and off</span>. When <span class="text-emphase-1">
-                                                on</span>, the <span class="text-emphase-2">last non-zero</span> volume value is 
-                                                applied.</p>
+                                            <p>
+                                                The <span class="emphase-1">volume</span> key<wbr>/<wbr>button <span class="emphase-1">turns</span>
+                                                the sound <span class="emphase-1">on and off</span>. When <span class="emphase-3">
+                                                on</span>, the <span class="emphase-2">last non-zero</span> volume value 
+                                                <span class="emphase-1">is applied</span>.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Volume Increasing-->
                             <section>
                                 <div class="assigned-keys">
                                     <img src="img/keyboard_keys/shift-2.png" alt="Key Shift"
-                                    >+<img src="img/keyboard_keys/r.png" alt="Key R">
+                                    >+<img src="img/keyboard_keys/arrow-3.png" alt="Key Up">
                                     /
                                     <img src="img/keyboard_keys/symbol-5.png" alt="Key Period (>)">
                                 </div>
@@ -359,18 +389,20 @@
                                     <div class="row">
                                         <div class="icon"></div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">louder</span> key
-                                                <span class="text-emphase-1">increases</span> volume of audio.</p>
+                                            <p>
+                                                The <span class="emphase-1">louder</span> key
+                                                <span class="emphase-1">increases</span> volume of audio.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Volume Decreasing-->
                             <section>
                                 <div class="assigned-keys">
                                     <img src="img/keyboard_keys/shift-2.png" alt="Key Shift"
-                                    >+<img src="img/keyboard_keys/f.png" alt="Key F">
+                                    >+<img src="img/keyboard_keys/arrow-2.png" alt="Key Down">
                                     /
                                     <img src="img/keyboard_keys/symbol-4.png" alt="Key Comma (<)">
                                 </div>
@@ -378,13 +410,15 @@
                                     <div class="row">
                                         <div class="icon"></div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">quieter</span> key
-                                                <span class="text-emphase-1">decreases</span> volume of audio.</p>
+                                            <p>
+                                                The <span class="emphase-1">quieter</span> key
+                                                <span class="emphase-1">decreases</span> volume of audio.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Shuffle-->
                             <section>
                                 <div class="assigned-keys">
@@ -402,9 +436,11 @@
                                             </div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">shuffle</span> button is 
-                                                <span class="text-emphase-4">disabled</span>. The playlist plays in 
-                                                <span class="text-emphase-1">clear order</span>.</p>
+                                            <p>
+                                                The <span class="emphase-1">shuffle</span> button is 
+                                                <span class="emphase-4">disabled</span>. The playlist plays in 
+                                                <span class="emphase-1">clear order</span>.
+                                            </p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -418,14 +454,16 @@
                                             </div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">shuffle</span> button is 
-                                                <span class="text-emphase-3">enabled</span>. It is used to 
-                                                <span class="text-emphase-1">randomly play</span> an audio from a given list.</p>
+                                            <p>
+                                                The <span class="emphase-1">shuffle</span> button is 
+                                                <span class="emphase-3">enabled</span>. It is used to 
+                                                <span class="emphase-1">randomly play</span> an audio from a given list.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Repeat-->
                             <section>
                                 <div class="assigned-keys">
@@ -443,10 +481,12 @@
                                             </div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">repeat</span> button is <span class="text-emphase-4">
-                                                disabled</span>. When an audio track has <span class="text-emphase-3">finished 
-                                                playing</span>, the <span class="text-emphase-2">next</span> track is automatically 
-                                                <span class="text-emphase-1">selected and played</span>.</p>
+                                            <p>
+                                                The <span class="emphase-1">repeat</span> button is <span class="emphase-4">
+                                                disabled</span>. When an audio <span class="emphase-2">track</span> has 
+                                                <span class="emphase-3">finished playing</span>, the <span class="emphase-2">
+                                                next</span> track is automatically <span class="emphase-1">selected and played</span>.
+                                            </p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -460,11 +500,13 @@
                                             </div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">repeat</span> button is <span class="text-emphase-3">
-                                                enabled</span> in <span class="text-emphase-1">playlist</span> mode. When the 
-                                                <span class="text-emphase-2">playlist</span> is <span class="text-emphase-3">
-                                                finished</span>, the player will <span class="text-emphase-1">stop playing and 
-                                                return</span> to its <span class="text-emphase-3">initial</span> appearance.</p>
+                                            <p>
+                                                The <span class="emphase-1">repeat</span> button is <span class="emphase-3">
+                                                enabled</span> in <span class="emphase-1">playlist</span> mode. When the 
+                                                <span class="emphase-2">playlist</span> is <span class="emphase-3">
+                                                finished</span>, the player will <span class="emphase-1">stop playing and 
+                                                return</span> to its <span class="emphase-3">initial</span> appearance.
+                                            </p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -478,16 +520,18 @@
                                             </div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">repeat</span> button is <span class="text-emphase-3">
-                                                enabled</span> in <span class="text-emphase-1">track</span> mode. It is used to play the 
-                                                <span class="text-emphase-2">selected</span> audio on <span class="text-emphase-1">
-                                                repeat</span>.</p>
+                                            <p>
+                                                The <span class="emphase-1">repeat</span> button is <span class="emphase-3">
+                                                enabled</span> in <span class="emphase-1">track</span> mode. It is used to play the 
+                                                <span class="emphase-2">selected</span> audio on <span class="emphase-1">
+                                                repeat</span>.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
-                            <!--Configuration-->
+
+                            <!--Button configuration-->
                             <section>
                                 <div class="assigned-keys">
                                     <img src="img/keyboard_keys/z.png" alt="Key Z">
@@ -498,14 +542,16 @@
                                             <div class="icon-background"><i class="icon-view-mode"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">configuration</span> key/button is used to 
-                                                <span class="text-emphase-1">change the scheme</span> of the 
-                                                <span class="text-emphase-3"> control buttons layout</span> in the audio player.</p>
+                                            <p>
+                                                The <span class="emphase-1">configuration</span> key<wbr>/<wbr>button is used to 
+                                                <span class="emphase-1">change the scheme</span> of the 
+                                                <span class="emphase-3"> control buttons layout</span> in the audio player.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Player Color-->
                             <section>
                                 <div class="assigned-keys">
@@ -517,13 +563,15 @@
                                             <div class="icon-background"><i class="icon-brush"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">color</span> key/button is used to 
-                                                <span class="text-emphase-1">adjust the color style</span> of the audio player.</p>
+                                            <p>
+                                                The <span class="emphase-1">color</span> key<wbr>/<wbr>button is used to 
+                                                <span class="emphase-1">adjust the color style</span> of the audio player.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
+
                             <!--Playlist Style-->
                             <section>
                                 <div class="assigned-keys">
@@ -535,8 +583,10 @@
                                             <div class="icon-background"><i class="icon-align-center"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p><span class="text-emphase-1">Smooth</span> playlist style 
-                                                <span class="text-emphase-3">enabled</span>.</p>
+                                            <p>
+                                                <span class="emphase-1">Smooth</span> playlist style 
+                                                <span class="emphase-3">enabled</span>.
+                                            </p>
                                         </div>
                                     </div>
                                     <div class="row">
@@ -544,39 +594,19 @@
                                             <div class="icon-background"><i class="icon-align-left"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p><span class="text-emphase-1">Strict</span> playlist style 
-                                                <span class="text-emphase-3">enabled</span>.</p>
+                                            <p>
+                                                <span class="emphase-1">Strict</span> playlist style 
+                                                <span class="emphase-3">enabled</span>.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
-    
-                            <!--Settings-->
+
+                            <!--Keys Info-->
                             <section>
                                 <div class="assigned-keys">
-                                    <img src="img/keyboard_keys/f.png" alt="Key F">
-                                </div>
-                                <div class="relevant-functions">
-                                    <div class="row">
-                                        <div class="icon">
-                                            <div class="icon-background"><i class="icon-cog-circled"></i></div>
-                                        </div>
-                                        <div class="description">
-                                            <p>The <span class="text-emphase-1">settings</span> key/button allows users to 
-                                                access the audio player settings to <span class="text-emphase-1">customize</span> 
-                                                some <span class="text-emphase-3">control options</span> and 
-                                                <span class="text-emphase-1">see</span> the <span class="text-emphase-2">current</span> 
-                                                playlist with an <span class="text-emphase-1">ordered</span> set of audio tracks even 
-                                                when <span class="text-emphase-3">shuffling</span> is enabled.</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-    
-                            <!--Key Info-->
-                            <section>
-                                <div class="assigned-keys">
-                                    <img src="img/keyboard_keys/t.png" alt="Key T">
+                                    <img src="img/keyboard_keys/i.png" alt="Key I">
                                 </div>
                                 <div class="relevant-functions">
                                     <div class="row">
@@ -584,20 +614,70 @@
                                             <div class="icon-background"><i class="icon-info"></i></div>
                                         </div>
                                         <div class="description">
-                                            <p>The <span class="text-emphase-1">information</span> key/button is used to get 
-                                                acquainted with the <span class="text-emphase-1">keys</span> assigned to the audio 
-                                                player buttons.</p>
+                                            <p>
+                                                The <span class="emphase-1">information</span> key<wbr>/<wbr>button is used to get 
+                                                acquainted with the <span class="emphase-1">keys assigned</span> to the audio 
+                                                player <span class="emphase-1">buttons</span>.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!--Escape/Close button-->
+                            <section>
+                                <div class="assigned-keys">
+                                    <img src="img/keyboard_keys/esc.png" alt="Key Escape">
+                                </div>
+                                <div class="relevant-functions">
+                                    <div class="row">
+                                        <div class="icon">
+                                            <i class="icon-close"></i>
+                                        </div>
+                                        <div class="description">
+                                            <p>
+                                                The <span class="emphase-1">close</span> key<wbr>/<wbr>button <span class="emphase-1">closes</span>
+                                                the active section/window.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!--Enter-->
+                            <section>
+                                <div class="assigned-keys">
+                                    <img src="img/keyboard_keys/enter.png" alt="Key Enter">
+                                </div>
+                                <div class="relevant-functions">
+                                    <div class="row">
+                                        <div class="icon"></div>
+                                        <div class="description">
+                                            <p>
+                                                When the <span class="emphase-2">track</span> from the playlist <span class="emphase-3">
+                                                is focused</span> the specified <span class="emphase-2">key</span> <span class="emphase-1">
+                                                (re)starts playing</span> that track from the <span class="emphase-3">beginning</span>.
+                                            </p>
+                                            <p>
+                                                Clicking on the <span class="emphase-3">track name</span> performs the same action.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </section>
                         </div>
+
+                        <button class="close-button"><i class="icon-close"></i></button>
                     </article>
                 </div>
-                <script async src="scripts/player.js" type="module"></script>
+
+                <script src="scripts/player.js" type="module"></script>
             </div>
+
+
         </main>
-        <footer>
+
+        <footer class="page-footer">
             <p>All rights reserved<br>&#169; <time><script>document.write(new Date().getFullYear());</script></time></p>
         </footer>
     </body>
