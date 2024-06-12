@@ -1,4 +1,5 @@
 :root {
+    --base-size: 60px;
     --site-footer-height: 50px;
     --site-color: #fafafa;
     --site-shadow-hover: 0 0 12px rgba(240, 240, 240, 0.5);
@@ -193,14 +194,14 @@ i {
 }
 
 header {
-    height: 150px;
+    padding-top: var(--base-size);
 }
 
 .smoothed-field {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 50px;
+    height: var(--base-size);
     padding: 0 15px;
     border-radius: 50px;
 }
@@ -215,7 +216,6 @@ header {
 
 .navigate {
     position: relative;
-    top: calc((150px - 50px)/2);
     margin: 0 6%;
 }
 .navigate:before {
@@ -237,14 +237,18 @@ header {
 }
 
 main {
-    padding-bottom: var(--site-footer-height);
+    padding-top: var(--base-size);
+    padding-bottom: calc(var(--base-size) + var(--site-footer-height));
 
     /*border: 1px solid;*/
+}
+main.music {
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .main-title {
     display: inline-block;
-    position: relative;
     margin: 20vh 6%;
     line-height: 1.5;
     letter-spacing: 2px;
@@ -254,13 +258,12 @@ main {
 .contact {
     position: absolute;
     left: 0;
-    bottom: 50px;
+    bottom: calc(var(--base-size) + var(--site-footer-height));
     width: 100%;
-    height: 120px;
+    height: var(--base-size);
 }
 .contact-links {
     position: absolute;
-    top: calc((120px - 50px)/2);
     right: 6%;
     font-size: 30pt;
 }
@@ -276,7 +279,7 @@ main {
 
 .about {
     display: flex;
-    margin: 10vh 6%;
+    margin: 6vh 6%;
 }
 .about > article {
     width: 48.5%;
@@ -299,6 +302,18 @@ main {
     line-height: 1.5;
 }
 
+/* Video container */
+#video-container {
+    /*flex: 0 1 auto;*/
+    max-width: 896px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+
+    /*outline: 1px solid;*/
+}
+
 /* Player container */
 #player-container {
     --common-spacing: 3px;
@@ -308,9 +323,6 @@ main {
     --common-color-inactive: 136, 136, 136;
     --player-width: 550px;
     --scroll-elements-opacity: 0;
-
-    margin-left: 12%;
-    margin-bottom: 50px;
 }
 #player-container.color-black {
     --background-player: linear-gradient(to left top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0));
@@ -356,7 +368,7 @@ main {
 #player {
     --player-lateral-padding: 26px;
     position: relative;
-    height: 100%;
+    /*height: 100%;*/
     width: var(--player-width);
     padding: var(--player-lateral-padding) var(--player-lateral-padding) 0;
     box-sizing: border-box;
@@ -369,7 +381,7 @@ main {
 }
 #player.show {
     transform-origin: 50% 0%;
-    animation: show-player 1800ms cubic-bezier(0.3,1,0.5,1.4) forwards;
+    animation: show-player 18ms cubic-bezier(0.3,1,0.5,1.4) forwards;
 }
 @keyframes show-player {
     0% {
@@ -394,12 +406,25 @@ main {
     opacity: 1;
 }
 
+/* Track info display */
 .selected-track {
     position: relative;
-    height: 60px;
+    height: 54px;
     margin-bottom: 24px;
     overflow: hidden;
     transition: color var(--transition-time-primary);
+}
+.selected-track .display {
+    display: inline-block;
+    position: relative;
+    white-space: nowrap;
+}
+.selected-track #title-display {
+    margin-bottom: 4px;
+    font-size: 18pt;
+}
+.selected-track #artist-display {
+    font-size: 11pt;
 }
 .selected-track > #start-info-display {
     position: absolute;
@@ -426,19 +451,8 @@ main {
     justify-content: center;
     font-size: 28pt;
 }
-.selected-track .display {
-    display: inline-block;
-    position: relative;
-    white-space: nowrap;
-}
-.selected-track #title-display {
-    padding-bottom: 6px;
-    font-size: 20pt;
-}
-.selected-track #artist-display {
-    font-size: 11pt;
-}
 
+/* Track time info */
 .track-time-info {
     display: flex;
     align-items: center;
@@ -491,6 +505,7 @@ main {
     background-color: rgb(var(--color-emphase));
 }
 
+/* Control buttons */
 player-controls {
     user-select: none;
 }
@@ -1004,7 +1019,7 @@ player-controls #volume-bar.active {
     transition: border-color var(--transition-time-primary);
 }
 .player-footer .left-col {
-    flex: 1 1 0;
+    flex: 1 1 1;
     text-align: left;
     user-select: none;
 }
@@ -1266,6 +1281,9 @@ footer.page-footer {
     }
     h3 {
         font-size: 32pt;
+    }
+    .navigate > a {
+        letter-spacing: 3px;
     }
     .about {
         flex-direction: column;

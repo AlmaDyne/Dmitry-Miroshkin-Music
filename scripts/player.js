@@ -113,7 +113,7 @@ let selectedAudio;
 
 const DEFAULTS_DATA = {
     'visible-tracks__classic-config': 5,
-    'visible-tracks__stylish-config': 4,
+    'visible-tracks__stylish-config': 3,
     'player_volume': 0.75,
     'scroll-elements-opacity': 70,
     'wheel-scroll-step': 2
@@ -870,8 +870,6 @@ function volumeAction() {
     if (selectedAudio) selectedAudio.volume = settedVolume;
     localStorage.setItem('player_volume', settedVolume);
     tooltipHoverIntentByElem.get(volumeRange).executeTask();
-    
-    highlightSelected(selectedAudio);
 }
 
 volumeRange.onclick = null;
@@ -2857,19 +2855,6 @@ function deactivateModalWindow(modalWindow) {
 
     if (savedActiveElem && savedActiveElem.tabIndex !== -1) savedActiveElem.focus();
     savedActiveElem = null;
-}
-
-// Text formatting
-function restoreText(str) {
-    return str.trim()
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/\s-\s/g, ' \u2013 ')
-        .replace(/\|/g, '<wbr>|<wbr>')
-        .replace(/\//g, '<wbr>/<wbr>')
-        .replace(/\\/g, '<wbr>\\<wbr>')
-        .replace(/(<wbr>)+/g, '<wbr>')
-    ;
 }
 
 // Set delay for group animations

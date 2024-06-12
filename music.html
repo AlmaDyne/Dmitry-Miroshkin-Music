@@ -38,7 +38,7 @@
             </nav>
         </header>
 
-        <main>
+        <main class="music">
             <div id="player-container" aria-label="Player" data-initial>
                 <div id="player" role="application">
                     <div class="selected-track">
@@ -105,7 +105,7 @@
                                     <!-- Example playlist track tree
     
                                     <div class="track">
-                                        <audio data-id="" data-artist="" data-title="" data-src="" data-dub=""
+                                        <audio data-artist="" data-title="" data-src=""
                                             src="(data-src)" type="audio/mpeg" preload="none"></audio>
                                         <div class="additionals">
                                             <div class="loading-figure"></div>
@@ -130,8 +130,6 @@
                                 </div>
                             </div>
                         </div>
-                    
-                        <div id="temporary-track-storage" style="outline: 1px solid" hidden></div>
     
                         <div class="playlist-scroll-arrow-box down">
                             <div id="playlist-scroll-arrow-down" class="scroll-arrow" hidden></div>
@@ -674,7 +672,12 @@
                 <script src="scripts/player.js" type="module"></script>
             </div>
 
-
+            <div id="video-container">
+                <iframe width="448" height="252" src="https://www.youtube.com/embed/M9aTHnASg4Y" title="Dmitry Miroshkin - Astronaut" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <iframe width="448" height="252" src="https://www.youtube.com/embed/5vzaYTBhQMQ" title="Dmitry Miroshkin &amp; Anthony Driverson - When the mountains fall" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <iframe width="448" height="252" src="https://www.youtube.com/embed/iyeGmnSf0_U" title="Dmitry Miroshkin - Sky never looked so blue (feat. James Hill)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <iframe width="448" height="252" src="https://www.youtube.com/embed/s1u8TlQ4MXE" title="Dmitry Miroshkin - Wind Waves (String Quartet)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
         </main>
 
         <footer class="page-footer">
