@@ -368,7 +368,6 @@ main.music {
 #player {
     --player-lateral-padding: 26px;
     position: relative;
-    /*height: 100%;*/
     width: var(--player-width);
     padding: var(--player-lateral-padding) var(--player-lateral-padding) 0;
     box-sizing: border-box;
@@ -381,7 +380,7 @@ main.music {
 }
 #player.show {
     transform-origin: 50% 0%;
-    animation: show-player 18ms cubic-bezier(0.3,1,0.5,1.4) forwards;
+    animation: show-player 1800ms cubic-bezier(0.3,1,0.5,1.4) forwards;
 }
 @keyframes show-player {
     0% {
