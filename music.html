@@ -8,6 +8,7 @@
         <link rel="icon" href="img/icons/favicon.png">
         <link rel="stylesheet" href="styles/fonts.css" type="text/css">
         <link rel="stylesheet" href="styles/style.css" type="text/css">
+        <link rel="stylesheet" href="styles/scrolling_cursors.css" type="text/css">
         <script src="scripts/libs/inert.min.js"></script>
         <script src="scripts/libs/scrollyfills.umd.js"></script>
     </head>
@@ -145,7 +146,7 @@
                             <i id="playlist-style" class="icon-align-center" data-tooltip="Playlist style"></i>
                         </div>
                         <div class="center-col">
-                            <span class="version">v1.4.6 Lite</span>
+                            <span class="version">v1.4.8 Lite</span>
                         </div>
                         <div class="right-col">
                             <i id="info" class="icon-info" data-tooltip="Assigned keys info"></i>
@@ -673,11 +674,21 @@
             </div>
 
             <div id="video-container">
-                <iframe src="https://www.youtube.com/embed/M9aTHnASg4Y" title="Dmitry Miroshkin - Astronaut" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                <iframe src="https://www.youtube.com/embed/5vzaYTBhQMQ" title="Dmitry Miroshkin &amp; Anthony Driverson - When the mountains fall" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                <iframe src="https://www.youtube.com/embed/iyeGmnSf0_U" title="Dmitry Miroshkin - Sky never looked so blue (feat. James Hill)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                <iframe src="https://www.youtube.com/embed/s1u8TlQ4MXE" title="Dmitry Miroshkin - Wind Waves (String Quartet)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                <div class="video-wrapper">
+                    <iframe class="video" src="https://www.youtube.com/embed/M9aTHnASg4Y" title="Dmitry Miroshkin - Astronaut" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+                <div class="video-wrapper">
+                    <iframe class="video" src="https://www.youtube.com/embed/5vzaYTBhQMQ" title="Dmitry Miroshkin &amp; Anthony Driverson - When the mountains fall" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+                <div class="video-wrapper">
+                    <iframe class="video" src="https://www.youtube.com/embed/iyeGmnSf0_U" title="Dmitry Miroshkin - Sky never looked so blue (feat. James Hill)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
+                <div class="video-wrapper">
+                    <iframe class="video" src="https://www.youtube.com/embed/s1u8TlQ4MXE" title="Dmitry Miroshkin - Wind Waves (String Quartet)" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                </div>
             </div>
+
+            <script src="scripts/videos.js" defer></script>
         </main>
 
         <footer class="page-footer">

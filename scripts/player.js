@@ -273,6 +273,8 @@ function connectAudioHandlers(audio) {
         if (audio === selectedAudio && playOn && !timePosSeeking) {
             console.log('playing | ' + audio.dataset.title);
 
+            window.dispatchEvent(new CustomEvent('startAudioPlaying'));
+
             clearUpdTimers();
             audio.volume = settedVolume;
             indicator.classList.add('active');
@@ -400,6 +402,8 @@ function moveTitles(...titles) {
 
 playPauseBtn.onclick = playPauseAction;
 
+window.addEventListener('pauseAudio', playPauseAction);
+
 function playPauseAction() {
     if (!selectedAudio) {
         selectedAudio = curOrderedAudios[0];
@@ -484,12 +488,16 @@ function stopAction() {
 
 function setPlayState() {
     playOn = true;
+    window.dispatchEvent(new CustomEvent('audioPlayerState', { detail: { playOn } }));
+
     playPauseBtn.classList.remove('icon-play');
     playPauseBtn.classList.add('icon-pause');
 }
 
 function setPauseState() {
     playOn = false;
+    window.dispatchEvent(new CustomEvent('audioPlayerState', { detail: { playOn } }));
+
     playPauseBtn.classList.remove('icon-pause');
     playPauseBtn.classList.add('icon-play');
 }
@@ -1845,8 +1853,6 @@ visPlaylistArea.onpointerdown = function(event) {
     this.setPointerCapture(event.pointerId);
 
     if (event.pointerType === 'mouse') {
-        let cursorScrollStyles = '<link rel="stylesheet" href="styles/scrolling_cursors.css" type="text/css">';
-        document.querySelector('head').insertAdjacentHTML('beforeend', cursorScrollStyles);
         document.body.classList.add('pointer-scroll-mode');
 
         eventManager.addOnceEventListener(this, 'pointerup', runPointerModeScrolling);
@@ -1986,7 +1992,6 @@ visPlaylistArea.onpointerdown = function(event) {
             }
     
             if (event.pointerType === 'mouse') {
-                document.querySelector('head > link[href="styles/scrolling_cursors.css"]').remove();
                 document.body.classList.remove('pointer-scroll-mode');
                 document.body.classList.remove('scroll-up');
                 document.body.classList.remove('scroll-down');
@@ -2940,11 +2945,16 @@ customElements.define('player-controls', class extends HTMLElement {
 });
 
 function changeConfig(idx) {
+    player.classList.remove(`buttons-configuration-${config}`);
     config = configsBank[idx] || configsBank[0];
     playerControls.setAttribute('config', config);
+    player.classList.add(`buttons-configuration-${config}`);
 
-    let numOfVisTracks = DEFAULTS_DATA[`visible-tracks__${config}-config`];
-    playlistLim.style.setProperty('--visible-tracks', numOfVisTracks);
+    console.log(player.offsetHeight);
+    console.log(document.getElementById('video-container').offsetHeight);
+
+    /*let numOfVisTracks = DEFAULTS_DATA[`visible-tracks__${config}-config`];
+    playlistLim.style.setProperty('--visible-tracks', numOfVisTracks);*/
 }
 
 /////////////////////

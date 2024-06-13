@@ -243,8 +243,11 @@ main {
     /*border: 1px solid;*/
 }
 main.music {
-    --video-width: 480px;
-    --video-spacing: 20px;
+    --common-spacing: 3px;
+    --common-border-radius: 36px;
+    --common-color-emphase: 14, 161, 9;
+    --common-color-warning: 196, 13, 43;
+    --common-color-inactive: 136, 136, 136;
     display: flex;
     justify-content: space-evenly;
     align-items: center;
@@ -307,31 +310,34 @@ main.music {
 
 /* Video container */
 #video-container {
-    max-width: calc(var(--video-width)*2 + var(--video-spacing));
+    --video-width: 480px;
+    --video-spacing: 27px;
+    max-width: calc(var(--video-width)*2 + var(--video-spacing)*3);
     height: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-evenly;
     flex-wrap: wrap;
 
     /*outline: 1px solid;*/
 }
+#video-container > .video-wrapper {
+    margin-bottom: var(--video-spacing);
+    border-radius: var(--common-border-radius);
+    overflow: hidden;
 
-#video-container > iframe {
+    border: 1px solid var(--site-color);
+}
+#video-container .video-wrapper:nth-last-child(-n+2) {
+    margin-bottom: 0;
+}
+#video-container > .video-wrapper > .video {
     width: var(--video-width);
     height: calc(var(--video-width)/16*9);
-    margin-bottom: var(--video-spacing);
-}
-#video-container > iframe:nth-last-child(-n+2) {
-    margin-bottom: 0;
+    vertical-align: middle;
 }
 
 /* Player container */
 #player-container {
-    --common-spacing: 3px;
-    --common-border-radius: 36px;
-    --common-color-emphase: 14, 161, 9;
-    --common-color-warning: 196, 13, 43;
-    --common-color-inactive: 136, 136, 136;
     --player-width: 550px;
     --scroll-elements-opacity: 0;
 }
@@ -376,6 +382,7 @@ main.music {
     --img-invert-filter: 0.95;
 }
 
+/* Player */
 #player {
     --player-lateral-padding: 26px;
     position: relative;
@@ -419,7 +426,7 @@ main.music {
 /* Track info display */
 .selected-track {
     position: relative;
-    height: 54px;
+    height: 56px;
     margin-bottom: 24px;
     overflow: hidden;
     transition: color var(--transition-time-primary);
@@ -430,7 +437,7 @@ main.music {
     white-space: nowrap;
 }
 .selected-track #title-display {
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     font-size: 18pt;
 }
 .selected-track #artist-display {
@@ -699,10 +706,15 @@ player-controls #volume-bar.active {
 /* Playlist limiter */
 #playlist-limiter {
     --track-height: 52px;
-    --visible-tracks: 0;
     height: calc(var(--track-height) * var(--visible-tracks));
     overflow: hidden;
     touch-action: none;
+}
+#player.buttons-configuration-classic #playlist-limiter {
+    --visible-tracks: 6;
+}
+#player.buttons-configuration-stylish #playlist-limiter {
+    --visible-tracks: 4;
 }
 
 /* Playlist */
@@ -1268,6 +1280,24 @@ footer.page-footer {
     line-height: 1.5em;
 }
 
+/* Media */
+@media screen and (max-width: 1528px) {
+    main.music {
+        align-items: flex-start;
+    }
+    #video-container {
+        max-width: var(--video-width);
+    }
+    #video-container .video-wrapper:nth-last-child(2) {
+        margin-bottom: var(--video-spacing);
+    }
+    #player.buttons-configuration-classic #playlist-limiter {
+        --visible-tracks: 15;
+    }
+    #player.buttons-configuration-stylish #playlist-limiter {
+        --visible-tracks: 13;
+    }
+}
 @media screen and (max-width: 1280px) {
     h3 {
         font-size: 26pt;
@@ -1279,17 +1309,6 @@ footer.page-footer {
         font-size: 13pt;
         letter-spacing: 3px;
         line-height: 1.4;
-    }
-}
-@media screen and (max-width: 1509px) {
-    main.music {
-        align-items: flex-start;
-    }
-    #video-container {
-        max-width: var(--video-width);
-    }
-    #video-container > iframe:nth-last-child(2) {
-        margin-bottom: var(--video-spacing);
     }
 }
 @media screen and (max-width: 1044px) {
@@ -1322,24 +1341,26 @@ footer.page-footer {
     #video-container {
         max-width: 100%;
         justify-content: space-evenly;
+        margin-top: var(--video-spacing);
     }
-    #video-container > iframe:nth-last-child(2) {
+    #video-container .video-wrapper:nth-last-child(2) {
         margin-bottom: 0;
     }
     #player-container {
         margin-left: calc(50% - var(--player-width)/2);
-        margin-bottom: var(--video-spacing);
+    }
+    #player.buttons-configuration-classic #playlist-limiter {
+        --visible-tracks: 6;
+    }
+    #player.buttons-configuration-stylish #playlist-limiter {
+        --visible-tracks: 4;
     }
     .keys-info .description {
         font-size: 11pt;
     }
 }
-@media screen and (max-width: 974px) {
-    #video-container {
-        max-width: var(--video-width);
-        margin-left: calc(50% - var(--video-width)/2);
-    }
-    #video-container > iframe:nth-last-child(2):nth-child(odd) {
+@media screen and (max-width: 978px) {
+    #video-container .video-wrapper:nth-last-child(2) {
         margin-bottom: var(--video-spacing);
     }
 }
