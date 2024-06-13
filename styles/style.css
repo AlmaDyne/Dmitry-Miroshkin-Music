@@ -243,8 +243,11 @@ main {
     /*border: 1px solid;*/
 }
 main.music {
+    --video-width: 480px;
+    --video-spacing: 20px;
     display: flex;
     justify-content: space-evenly;
+    align-items: center;
 }
 
 .main-title {
@@ -304,14 +307,22 @@ main.music {
 
 /* Video container */
 #video-container {
-    /*flex: 0 1 auto;*/
-    max-width: 896px;
+    max-width: calc(var(--video-width)*2 + var(--video-spacing));
+    height: 100%;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: space-between;
     flex-wrap: wrap;
 
     /*outline: 1px solid;*/
+}
+
+#video-container > iframe {
+    width: var(--video-width);
+    height: calc(var(--video-width)/16*9);
+    margin-bottom: var(--video-spacing);
+}
+#video-container > iframe:nth-last-child(-n+2) {
+    margin-bottom: 0;
 }
 
 /* Player container */
@@ -380,7 +391,7 @@ main.music {
 }
 #player.show {
     transform-origin: 50% 0%;
-    animation: show-player 1800ms cubic-bezier(0.3,1,0.5,1.4) forwards;
+    animation: show-player 18ms cubic-bezier(0.3,1,0.5,1.4) forwards;
 }
 @keyframes show-player {
     0% {
@@ -1270,8 +1281,18 @@ footer.page-footer {
         line-height: 1.4;
     }
 }
-
-@media screen and (orientation: portrait) {
+@media screen and (max-width: 1509px) {
+    main.music {
+        align-items: flex-start;
+    }
+    #video-container {
+        max-width: var(--video-width);
+    }
+    #video-container > iframe:nth-last-child(2) {
+        margin-bottom: var(--video-spacing);
+    }
+}
+@media screen and (max-width: 1044px) {
     h1 {
         font-size: 39pt;
     }
@@ -1295,10 +1316,30 @@ footer.page-footer {
         font-size: 9pt;
         letter-spacing: 2px;
     }
+    main.music {
+        display: block;
+    }
+    #video-container {
+        max-width: 100%;
+        justify-content: space-evenly;
+    }
+    #video-container > iframe:nth-last-child(2) {
+        margin-bottom: 0;
+    }
     #player-container {
         margin-left: calc(50% - var(--player-width)/2);
+        margin-bottom: var(--video-spacing);
     }
     .keys-info .description {
         font-size: 11pt;
+    }
+}
+@media screen and (max-width: 974px) {
+    #video-container {
+        max-width: var(--video-width);
+        margin-left: calc(50% - var(--video-width)/2);
+    }
+    #video-container > iframe:nth-last-child(2):nth-child(odd) {
+        margin-bottom: var(--video-spacing);
     }
 }
