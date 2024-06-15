@@ -1,7 +1,5 @@
 'use strict';
 
-
-
 // Остановка текущего источника воспроизведения при включении нового //
 
 // Загрузка YouTube IFrame Player API асинхронно
@@ -10,8 +8,8 @@ youtubeIframeApiScript.src = "https://www.youtube.com/iframe_api";
 const firstScript = document.getElementsByTagName('script')[0];
 firstScript.parentNode.insertBefore(youtubeIframeApiScript, firstScript);
 
-// Создание пустого массива для хранения плееров
-const players = [];
+const videos = document.getElementById('video-container').querySelectorAll('.video');
+const videoPlayers = [];
 
 let isAudioPlaying = false;
 
@@ -20,17 +18,19 @@ window.addEventListener('audioPlayerState', function(event) {
 });
 
 window.addEventListener('startAudioPlaying', function() {
-    players.forEach(function(player) {
+    videoPlayers.forEach(function(player) {
         player.pauseVideo();
     });
 });
 
+window.addEventListener('showVideos', function() {
+    videos.forEach(function(video, idx) {
+        setTimeout(() => video.parentElement.classList.add('show'), idx * 300);
+    });
+}, { once: true });
+
 // Функция, вызываемая API после загрузки
 function onYouTubeIframeAPIReady() {
-    // Находим все элементы iframe на странице
-    const videoContainer = document.getElementById('video-container');
-    const videos = videoContainer.querySelectorAll('.video');
-
     // Инициализация плееров для каждого найденного iframe
     videos.forEach(function(video, idx) {
         // Добавление enablejsapi=1 к URL, если еще не добавлено
@@ -39,7 +39,7 @@ function onYouTubeIframeAPIReady() {
         }
 
         // Создание плеера с помощью API и добавление его в массив
-        players[idx] = new YT.Player(video, {
+        videoPlayers[idx] = new YT.Player(video, {
             events: {
                 'onStateChange': onPlayerStateChange
             }
@@ -52,7 +52,7 @@ function onPlayerStateChange(event) {
     // Если видео начинает воспроизводиться
     if (event.data == YT.PlayerState.PLAYING) {
         // Остановка всех других видео
-        players.forEach(function(player) {
+        videoPlayers.forEach(function(player) {
             if (player !== event.target) {
                 player.pauseVideo();
             }
