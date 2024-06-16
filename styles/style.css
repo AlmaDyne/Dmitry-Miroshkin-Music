@@ -309,6 +309,24 @@ main.music {
     line-height: 1.5;
 }
 
+.contact-message,
+.contact-e-mail {
+    margin: 10vh 6%;
+    letter-spacing: 1px;
+}
+.contact-message > h2 {
+    font-size: 38pt;
+    font-weight: bold;
+}
+.contact-e-mail > h3 {
+    font-size: 22pt;
+    font-weight: bold;
+}
+.contact-message > p,
+.contact-e-mail > p {
+    font-size: 20pt;
+}
+
 /* Video container */
 #video-container {
     --video-width: 480px;
@@ -564,8 +582,8 @@ audio-controls .circle-background,
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 23px; /* Чётность должна совпадать с чётностью соотв. свойства эл-та i#volume */
-    height: 23px; /* Чётность должна совпадать с чётностью соотв. свойства эл-та i#volume */
+    width: 23px; /* Чётность должна совпадать с чётностью соотв. свойства доч. эл-та img */
+    height: 23px; /* Чётность должна совпадать с чётностью соотв. свойства доч. эл-та img */
     background-color: rgb(var(--common-color-inactive));
     border-radius: 50%;
     transition:
@@ -582,8 +600,8 @@ audio-controls .btn-img-wrapper:hover .circle-background {
 }
 audio-controls .circle-background > img,
 .keys-info .circle-background > img {
-    width: 13px; /* Чётность должна совпадать с чётностью соотв. свойства эл-та .circle-background */
-    height: 13px; /* Чётность должна совпадать с чётностью соотв. свойства эл-та .circle-background */
+    width: 13px; /* Чётность должна совпадать с чётностью соотв. свойства родит. эл-та .circle-background */
+    height: 13px; /* Чётность должна совпадать с чётностью соотв. свойства родит. эл-та .circle-background */
     filter: invert(var(--img-invert-filter));
     transition: filter var(--transition-time-primary);
     user-select: none;
@@ -1106,6 +1124,7 @@ audio-controls #volume-bar.active {
 }
 .keys-info h2 {
     margin-bottom: 5px;
+    line-height: 1.5;
     color: rgb(var(--common-color-emphase));
     font-family: 'Garet';
     font-weight: bolder;
@@ -1316,6 +1335,10 @@ footer.page-footer {
     .navigate > a {
         letter-spacing: 3px;
     }
+    main.music {
+        flex-direction: column;
+        align-items: center;
+    }
     .about {
         flex-direction: column;
     }
@@ -1327,9 +1350,15 @@ footer.page-footer {
         font-size: 9pt;
         letter-spacing: 2px;
     }
-    main.music {
-        flex-direction: column;
-        align-items: center;
+    .contact-message > h2 {
+        font-size: 30pt;
+    }
+    .contact-e-mail > h3 {
+        font-size: 18pt;
+    }
+    .contact-message > p,
+    .contact-e-mail > p {
+        font-size: 16pt;
     }
     #video-container {
         --video-width: 448px;
