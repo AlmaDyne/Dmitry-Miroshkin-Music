@@ -21,7 +21,7 @@ html {
 body {
     position: relative;
     width: 100%;
-    min-width: 640px;
+    min-width: 682px;
     min-height: 100%;
     background: url("../img/minimalist_piano.jpg") no-repeat fixed;
     background-size: cover;
@@ -36,6 +36,11 @@ body.loading {
 
 p {
     padding: 5px 0;
+
+    -webkit-text-size-adjust: none; /* Для Safari и Chrome */
+    -moz-text-size-adjust: none; /* Для Firefox */
+    -ms-text-size-adjust: none; /* Для Internet Explorer */
+    text-size-adjust: none;
 }
 
 h1 {
@@ -259,6 +264,7 @@ main.music {
     margin: 20vh 6%;
     line-height: 1.5;
     letter-spacing: 2px;
+    white-space: nowrap;
     user-select: none;
 }
 
@@ -308,6 +314,9 @@ main.music {
     letter-spacing: 4px;
     line-height: 1.5;
 }
+.about .info.hidden {
+    visibility: hidden;
+}
 
 .contact-message,
 .contact-e-mail {
@@ -336,8 +345,6 @@ main.music {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
-
-    /*outline: 1px solid;*/
 }
 #video-container > .video-wrapper {
     margin-bottom: var(--video-spacing);
@@ -1309,7 +1316,7 @@ footer.page-footer {
         --visible-tracks: 13;
     }
 }
-@media screen and (max-width: 1280px) {
+@media screen and (max-width: 1320px) {
     h3 {
         font-size: 26pt;
     }
@@ -1319,7 +1326,6 @@ footer.page-footer {
     .about .info {
         font-size: 13pt;
         letter-spacing: 3px;
-        line-height: 1.4;
     }
 }
 @media screen and (max-width: 1054px) {
@@ -1330,7 +1336,7 @@ footer.page-footer {
         font-size: 20pt;
     }
     h3 {
-        font-size: 32pt;
+        font-size: 22pt;
     }
     .navigate > a {
         letter-spacing: 3px;
@@ -1339,15 +1345,11 @@ footer.page-footer {
         flex-direction: column;
         align-items: center;
     }
-    .about {
-        flex-direction: column;
-    }
-    .about > article {
-        width: 80%;
-        margin: auto;
+    .about .title {
+        height: 60px;
     }
     .about .info {
-        font-size: 9pt;
+        font-size: 11pt;
         letter-spacing: 2px;
     }
     .contact-message > h2 {
@@ -1380,6 +1382,41 @@ footer.page-footer {
     }
 }
 @media screen and (orientation: portrait) {
+    h1 {
+        font-size: 48pt;
+    }
+    h2 {
+        font-size: 25pt;
+    }
+    h3 {
+        font-size: 28pt;
+        letter-spacing: 2px;
+    }
+    .about {
+        flex-direction: column;
+    }
+    .about > article {
+        width: 80%;
+        margin: auto;
+    }
+    .about .title {
+        height: 80px;
+    }
+    .about .info {
+        font-size: 16pt;
+        letter-spacing: 3px;
+    }
+    .contact-message > h2 {
+        font-size: 38pt;
+    }
+    .contact-e-mail > h3 {
+        font-size: 22pt;
+    }
+    .contact-message > p,
+    .contact-e-mail > p {
+        padding: 10px 0;
+        font-size: 20pt;
+    }
     #video-container {
         --video-width: var(--player-width);
         width: var(--video-width);

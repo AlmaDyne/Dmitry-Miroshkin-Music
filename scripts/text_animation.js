@@ -1,6 +1,7 @@
 'use strict';
 
 const infoElements = Array.from(document.querySelectorAll('.about .info'));
+
 const infoData = infoElements.map(info => {
     const paragraphs = Array.from(info.children);
     const textLengths = paragraphs.map(p => p.dataset.text.length);
@@ -9,11 +10,23 @@ const infoData = infoElements.map(info => {
         const textLength = textLengths.slice(0, idx + 1).reduce((sum, length) => sum + length, 0);
         return textLength / allTextLength;
     });
+
+    if (window.innerWidth <= 1054) {
+        const infoHeight = paragraphs.reduce((acc, p) => {
+            p.textContent = p.dataset.text;
+            const pHeight = acc + p.offsetHeight;
+            p.textContent = '';
+            return pHeight;
+        }, 0);
+        info.style.height = infoHeight + 'px';
+    }
     
     return { paragraphs, textRatios };
 });
 
 window.addEventListener('load', () => {
+    infoElements.forEach(info => info.classList.remove('hidden'));
+
     animateText({
         timing(timeFraction) {
             return Math.pow(timeFraction, 1.75);
@@ -56,6 +69,8 @@ function animateText({timing, draw, duration}) {
     
         if (timeFraction < 1) {
             requestAnimationFrame(animateFrame);
+        } else {
+            infoElements.forEach(info => info.style.height = '');
         }
     });
 }
