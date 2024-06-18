@@ -235,7 +235,7 @@ header {
     font-size: 18pt;
     letter-spacing: 4px;
     text-transform: uppercase;
-    /*user-select: none;*/
+    user-select: none;
 }
 
 .current-page {
@@ -263,7 +263,7 @@ main.music {
     line-height: 1.5;
     letter-spacing: 2px;
     white-space: nowrap;
-    /*user-select: none;*/
+    user-select: none;
 }
 
 .contact {
@@ -474,6 +474,7 @@ main.music {
     width: 100%;
     height: inherit;
     font-size: 12pt;
+    line-height: 1.17;
     text-transform: none;
     color: var(--color-primary);
     overflow: auto;
@@ -550,7 +551,7 @@ main.music {
 
 /* Audio control buttons */
 audio-controls {
-    /*user-select: none;*/
+    user-select: none;
 }
 audio-controls i {
     margin: 0 5px;
@@ -773,7 +774,7 @@ audio-controls #volume-bar.active {
     left: 8px;
     top: 0;
     height: 100%;
-    /*user-select: none;*/
+    user-select: none;
 }
 #playlist > .track > .additionals::before {
     content: '';
@@ -1035,7 +1036,7 @@ audio-controls #volume-bar.active {
     border-radius: 5px;
     border-top-left-radius: 0;
     cursor: pointer;
-    /*user-select: none;*/
+    user-select: none;
 }
 .track-menu > .menu-item:hover {
     background: var(--background-hover2);
@@ -1060,14 +1061,14 @@ audio-controls #volume-bar.active {
 }
 .audio-player-footer > .column.left {
     text-align: left;
-    /*user-select: none;*/
+    user-select: none;
 }
 .audio-player-footer > .column.center {
     line-height: 1em;
 }
 .audio-player-footer > .column.right {
     text-align: right;
-    /*user-select: none;*/
+    user-select: none;
 }
 .audio-player-footer .config-wrapper {
     display: inline-block;
@@ -1210,7 +1211,7 @@ audio-controls #volume-bar.active {
 .keys-info .icon i,
 .keys-info .icon div {
     cursor: default;
-    /*user-select: none;*/
+    user-select: none;
     pointer-events: none;
 }
 .keys-info .description {
