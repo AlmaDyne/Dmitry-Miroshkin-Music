@@ -1,6 +1,6 @@
 'use strict';
 
-const navigate = document.querySelector('.navigate');
+/*const navigate = document.querySelector('.navigate');
 
 navigate.addEventListener('click', function(event) {
     const targetA = event.target.closest('a');
@@ -29,4 +29,4 @@ function shuffle(array) {
     }
 
     return array;
-}
+}*/
